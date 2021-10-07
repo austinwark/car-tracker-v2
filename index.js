@@ -1,5 +1,6 @@
 const express = require("express");
 const mysql = require("mysql");
+const Scraper = require("./utils/scraper.js");
 
 const app = express();
 app.use(express.json());
@@ -20,14 +21,24 @@ app.get("/", (req, res) => {
 
 app.get("/api/queries/all", (req, res) => {
     const sqlQuery = "SELECT * FROM queries";
-    connection.query(sqlQuery, function(err, results) {
+    connection.query(sqlQuery, async function(err, results) {
         if (err) {
-
             console.log(err);
-        } else {
-            // console.log(results);
-            res.status(200).send({ results: results});
+            return;
         }
+        for (let i = 0; i < results.length; i++) {
+            const scraper = new Scraper(results[i]);
+            const scrapedData = await scraper.getResults();
+            console.log("-------------------")
+            console.log(results[i]);
+            console.log(scrapedData);
+        }
+        // const scraper = new Scraper(results[0]);
+        // const scrapedData = await scraper.getResults();
+        // console.log(scrapedData);
+        console.log("==================")
+        res.status(200).send({ results: results});
+        
     })
 });
 
