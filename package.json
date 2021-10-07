@@ -1,0 +1,24 @@
+{
+  "name": "car-tracker-new",
+  "version": "1.0.0",
+  "description": "New version of the tracker-appr",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "css": "sass --watch ./public/styles.scss ./public/styles.css",
+    "dev": "concurrently \"npm run css\" \"nodemon index.js\""
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.10",
+    "express": "^4.17.1",
+    "firebase": "^9.1.1",
+    "mysql": "^2.18.1",
+    "nodemon": "^2.0.13",
+    "sass": "^1.42.1"
+  },
+  "devDependencies": {
+    "concurrently": "^6.3.0"
+  }
+}

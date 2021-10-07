@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Tracker Appr</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+        <link rel="stylesheet" href="/styles.css" type="text/css" />
+    </head>
+    <body>
+        <main class="container-fluid">
+            <div class="row m-0 p-0 w-100">
+
+                <!-- *** Side Panel *** -->
+                <section id="side-panel" class="col-3">
+                    <div class="row">
+                        <div class="col-12 text-center mt-5">
+                            <h1><i class="bi bi-search"></i></h1>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 text-center mt-2">
+                            <p class="mb-0">@FakeUser</p>
+                            <p>fakeemail@email.com</p>
+                        </div>
+                        <hr />
+                    </div>
+                    <div class="row">
+                        <div class="col-12 d-flex flex-column justify-content-center text-center">
+                            <h2 class="text-center"><i class="bi bi-arrow-left-right"></i> Queries</h2>
+                            <ul class="queries-list p-0 d-inline-block">
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 text-center">
+                            <button id="create-offcanvas-button" type="button" class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#create-offcanvas">Create</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- *** Results Panel *** -->
+                <section id="results-panel" class="col-6">
+                    <h2 class="text-center">Query Results</h2>
+                    <table class="table table-hover w-100">
+                        <thead>
+                            <tr>
+                                <th scope="col">Stock #</th>
+                                <th scope="col">Year</th>
+                                <th scope="col">Make</th>
+                                <th scope="col">Model</th>
+                                <th scope="col">Trim</th>
+                                <th scope="col">Price</th>
+                                <th scope="col">Ext. Color</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>U11340</td>
+                                <td>2021</td>
+                                <td>Toyota</td>
+                                <td>Camry</td>
+                                <td>SE</td>
+                                <td>$11,500</td>
+                                <td>Super White</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <!-- *** Meta Panel *** -->
+                <section id="meta-panel" class="col-3">
+    
+                </section>
+            </div>
+           
+        </main>
+        <!-- <div class="modal fade" id="create-modal" tabindex="-1" aria-labelledby="create-modal-header" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="create-modal-header">Create a Query</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container-fluid">
+
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </div>
+            </div>
+        </div> -->
+        <div class="offcanvas offcanvas-start" tabindex="-1" id="create-offcanvas" data-bs-backdrop="false" aria-labelledby="create-offcanvas-header">
+            <div class="offcanvas-header">
+                <h4 class="offcanvas-title" id="create-offcanvas-header">Create a Query</h4>
+                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body">
+                <div class="container-fluid">
+                    <form id="create-form" class="row">
+                        <h5>Query Details</h5>
+                        <div class="col-12">
+                            <label for="create-input-name" class="form-label">Query Name</label>
+                            <input name="query-name" type="text" class="form-control form-control-sm" id="create-input-name" placeholder="Tacoma for Bob" required />
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input name="auto-updates" class="form-check-input" type="checkbox" id="create-switch-auto" value="true" />
+                                <label class="form-check-label" for="create-switch-auto">Automatic email updates</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input name="only-new" class="form-check-input" type="checkbox" id="create-switch-new" value="true" />
+                                <label class="form-check-label" for="create-switch-new">Send only new results</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input name="all-dealers" class="form-check-input" type="checkbox" id="create-switch-dealers" value="true" />
+                                <label class="form-check-label" for="create-switch-dealers">Search all dealerships</label>
+                            </div>
+                        </div>
+                        <hr />
+                        <h5>Vehicle Details</h5>
+                        <div class="col-12">
+                            <label for="create-select-model" class="form-label">Model</label>
+                            <select name="model" id="create-select-model" class="form-select form-select-sm" required>
+                                <option value="Avalon">Avalon</option>
+                                <option value="Camry">Camry</option>
+                                <option value="Corolla">Corolla</option>
+                                <option value="Prius">Prius</option>
+                                <option value="Sienna">Sienna</option>
+                                <option value="4Runner">4Runner</option>
+                                <option value="Highlander">Highlander</option>
+                                <option value="RAV4">RAV4</option>
+                                <option value="RAV4 Prime">RAV4 Prime</option>
+                                <option value="Tacoma">Tacoma</option>
+                                <option value="Tundra">Tundra</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label for="create-input-min-price" class="form-label">Min Price</label>
+                            <input name="min-price" class="form-control form-control-sm" id="create-input-min-price" type="number" step="100" min="0" max="100000" required />
+                        </div>
+                        <div class="col-6">
+                            <label for="create-input-max-price" class="form-label">Max Price</label>
+                            <input name="max-price" class="form-control form-control-sm" id="create-input-max-price" type="number" step="100" min="0" max="100000" required/>
+                        </div>
+                        <div class="col-6">
+                            <label for="create-input-min-year" class="form-label">Min Year</label>
+                            <input name="min-year" class="form-control form-control-sm" id="create-input-min-year" type="number" step="1" min="2000" max="2022" required />
+                        </div>
+                        <div class="col-6">
+                            <label for="create-input-max-year" class="form-label">Max Year</label>
+                            <input name="max-year" class="form-control form-control-sm" id="create-input-max-year" type="number" step="1" min="2000" max="2022" required/>
+                        </div>
+                        <hr />
+                        <h5>Customer Details</h5>
+                        <div class="col-12">
+                            <label for="create-input-customer-name" class="form-label">Customer Name</label>
+                            <input name="customer-name" class="form-control form-control-sm" id="create-input-customer-name" type="text" />
+                        </div>
+                        <div class="col-12">
+                            <label for="create-input-customer-phone" class="form-label">Customer Phone #</label>
+                            <input name="customer-phone" class="form-control form-control-sm" id="create-input-customer-phone" type="text" />
+                        </div>
+                        <div class="col-12">
+                            <label for="create-input-customer-notes" class="form-label">Notes</label>
+                            <input name="notes" class="form-control form-control-sm" id="create-input-customer-notes" type="text" />
+                        </div>
+                        <div class="col-12 text-center">
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+        <script>
+            $("document").ready(() => {
+
+                updateQueriesList();
+
+                // Focuses first input in form
+                $("#create-offcanvas-button").on("click", () => {
+                    $("input[name=query-name]").focus();
+                });
+
+                $("#create-form").submit(event => {
+                    const formData = convertFormToJson($("#create-form"));
+                    $.ajax({
+                        type: "POST",
+                        url: "api/queries/submit",
+                        data: JSON.stringify(formData),
+                        contentType: "application/json;charset=UTF-8",
+                        success: function() {
+                            clearFormData();
+                        },
+                        error: function(request, status, error) {
+                            console.error(error);
+                        }
+                    });
+
+                    event.preventDefault();
+                });
+            });
+
+            const updateQueriesList = () => {
+                $.ajax({
+                    type: "GET",
+                    url: "api/queries/all",
+                    success: function(data) {
+                        console.log("-----SUCCESSFUL GET-----");
+                        const { results } = data;
+                        for (let i = 0; i < results.length; i++) {
+                            console.log(results[i].name);
+                            const queryListItemHtml = `<li># ${results[i].name}</li>`;
+                            $(".queries-list").append(queryListItemHtml);
+                        }
+                    },
+                    error: function(request, status, error) {
+                        console.error(error);
+                    }
+                })
+            }
+
+            /* Resets form fields */
+            const clearFormData = () => {
+                $("#create-form").find("input[type=text], input[type=number]").val("");
+                $("#create-form").find("input[type=checkbox]").prop("checked", false);
+                $("#create-form").find("select")[0].selectedIndex = 0;
+            }
+
+            const convertFormToJson = form => {
+                const dataArray = $(form).serializeArray();
+                const dataObject = {};
+
+                $(dataArray).each((i, field) => {
+                    dataObject[field.name] = field.value;
+                });
+
+                // Adds checkbox values to object (if not checked jQuery does not include it automatically)
+                dataObject["only-new"] = "only-new" in dataObject;
+                dataObject["all-dealers"] = "all-dealers" in dataObject;
+                dataObject["auto-updates"] = "auto-updates" in dataObject;
+
+                console.log(dataObject);
+                return dataObject;
+            }
+        </script>
+    </body>
+</html>

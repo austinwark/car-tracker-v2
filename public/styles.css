@@ -1,0 +1,37 @@
+/* Theming */
+.btn-primary {
+  background-color: #8D5DB4;
+}
+
+.btn-primary:hover {
+  background-color: #664482;
+}
+
+main {
+  height: 100vh;
+  display: flex;
+  padding: 0 !important;
+  background-color: #E1E7E4;
+}
+main #side-panel {
+  background-color: #9497B0;
+}
+main #side-panel .bi-search {
+  font-size: 40px;
+}
+main #side-panel h2 {
+  font-size: 20px;
+}
+main #side-panel #create-offcanvas-button {
+  padding: 0.375rem 1.5rem;
+}
+main #side-panel .queries-list {
+  list-style: none;
+  cursor: pointer;
+}
+main #side-panel .queries-list li:hover {
+  color: #FAFAFAAF;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+/*# sourceMappingURL=styles.css.map */
