@@ -29,6 +29,9 @@ main #side-panel .queries-list {
   list-style: none;
   cursor: pointer;
 }
+main #side-panel .queries-list .query-selected {
+  font-weight: 700;
+}
 main #side-panel .queries-list li:hover {
   color: #FAFAFAAF;
   background-color: rgba(0, 0, 0, 0.1);

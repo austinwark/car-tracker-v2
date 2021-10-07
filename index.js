@@ -21,22 +21,12 @@ app.get("/", (req, res) => {
 
 app.get("/api/queries/all", (req, res) => {
     const sqlQuery = "SELECT * FROM queries";
+    // Get all queries from queries table
     connection.query(sqlQuery, async function(err, results) {
         if (err) {
             console.log(err);
             return;
         }
-        for (let i = 0; i < results.length; i++) {
-            const scraper = new Scraper(results[i]);
-            const scrapedData = await scraper.getResults();
-            console.log("-------------------")
-            console.log(results[i]);
-            console.log(scrapedData);
-        }
-        // const scraper = new Scraper(results[0]);
-        // const scrapedData = await scraper.getResults();
-        // console.log(scrapedData);
-        console.log("==================")
         res.status(200).send({ results: results});
         
     })
@@ -46,12 +36,9 @@ app.post("/api/queries/submit", (req, res) => {
     const isDataJson = isJson(req.body);
     if (isDataJson) {
 
-        console.log(req.body);
         const data = parseJson(req.body);
-        console.log(data);
         const sqlQuery = mysql.format("INSERT INTO queries (name, autoUpdates, onlyNew, allDealerships, model, minPrice, maxPrice, minYear, maxYear, customerName, customerPhone, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
         [data.name, data.autoUpdates, data.onlyNew, data.allDealerships, data.model, data.minPrice, data.maxPrice, data.minYear, data.maxYear, data.customerName, data.customerPhone, data.notes]);
-        console.log(sqlQuery);
         // connection.query(sqlQuery, function(err, results) {
         //     if (err) {
         //         console.log(err);
@@ -64,6 +51,55 @@ app.post("/api/queries/submit", (req, res) => {
         res.status(406).send(); // TODO: is this the right status code?
     }
 });
+
+app.get("/api/results/refresh", (req, res) => {
+    const sqlQuery = "SELECT * FROM QUERIES";
+
+    // Get all queries from queries table
+    connection.query(sqlQuery, async function(err, results) {
+
+        // Iterate for each query
+        for (let i = 0; i < results.length; i++) {
+            const resultsList = [];
+
+            // Get query results
+            const scraper = new Scraper(results[i]);
+            const scrapedData = await scraper.getResults();
+
+            // Save array of results into larger array to be passed to SQL query
+            for (let k = 0; k < scrapedData.length; k++) {
+                let arr = Object.values(scrapedData[k]);
+                arr.unshift(results[i].queryId); // Save query id to result row
+                resultsList.push(arr);
+            }
+            
+            if (resultsList.length < 1)
+                continue;
+
+            // Save each result to results table and replace row if already exists
+            const sql = "REPLACE INTO results (queryId, stock, make, model, year, trim, extColor, price, vin, intColor, transmission, engine, miles, dealer, link, carfaxLink) VALUES ?";
+            const values = resultsList;
+            connection.query(sql, [values], function(err) {
+                if (err)
+                    console.error(err);
+                
+            });
+        }
+    });
+});
+
+app.get("/api/results/:queryId", (req, res) => {
+    const queryId = req.params.queryId;
+    const sqlQuery = `SELECT * FROM results WHERE queryId = ${queryId}`;
+    connection.query(sqlQuery, function(err, results) {
+        if (err) {
+            console.error(err);
+        }
+        else {
+            res.status(200).send(results);
+        }
+    })
+})
 
 function parseJson(data) {
     const dataObject = {};
