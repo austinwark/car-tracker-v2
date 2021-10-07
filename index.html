@@ -57,15 +57,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>U11340</td>
-                                <td>2021</td>
-                                <td>Toyota</td>
-                                <td>Camry</td>
-                                <td>SE</td>
-                                <td>$11,500</td>
-                                <td>Super White</td>
-                            </tr>
+                            <!-- Results -->
                         </tbody>
                     </table>
                 </section>
@@ -187,7 +179,9 @@
         <script>
             $("document").ready(() => {
 
-                updateQueriesList();
+                instantiateQueryListAndResultListUi();
+                
+                refreshResults();
 
                 // Focuses first input in form
                 $("#create-offcanvas-button").on("click", () => {
@@ -203,6 +197,7 @@
                         contentType: "application/json;charset=UTF-8",
                         success: function() {
                             clearFormData();
+                            $(".offcanvas").removeClass("show");
                         },
                         error: function(request, status, error) {
                             console.error(error);
@@ -213,23 +208,92 @@
                 });
             });
 
-            const updateQueriesList = () => {
-                $.ajax({
+            /* Called on first page load. Fetches and displays all queries, then fetches and displays the first query's results */
+            const instantiateQueryListAndResultListUi = () => {
+                getQueriesList().then(displayQueriesList).then(getQueryResults).then(displayQueryResults).then(() => {
+                    // Highlight first query in list
+                    $(".queries-list").children().first().addClass("query-selected");
+                });
+
+            }
+
+            /* Calls ajax GET method to fetch list of queries. Returns a Promise */
+            const getQueriesList = () => {
+                return $.ajax({
                     type: "GET",
                     url: "api/queries/all",
-                    success: function(data) {
-                        console.log("-----SUCCESSFUL GET-----");
-                        const { results } = data;
-                        for (let i = 0; i < results.length; i++) {
-                            console.log(results[i].name);
-                            const queryListItemHtml = `<li># ${results[i].name}</li>`;
-                            $(".queries-list").append(queryListItemHtml);
-                        }
-                    },
                     error: function(request, status, error) {
                         console.error(error);
                     }
                 })
+            }
+
+            /* Takes list of queries and displays each query to query list in HTML page. Returns first query's id, used on first page load. */
+            const displayQueriesList = queries => {
+                const { results } = queries;
+                for (let i = 0; i < results.length; i++) {
+                    const queryListItemHtml = `<li data-query-id=${results[i].queryId}># ${results[i].name}</li>`;
+                    $(".queries-list").append(queryListItemHtml);
+                }
+                const firstQueryId = results[0].queryId;
+
+                $(".queries-list").on("click", "li", event => {
+                    const queryId = $(event.currentTarget).data("query-id");
+                    handleQueryClicked(queryId);
+                    
+                });
+
+                return firstQueryId;
+            }
+
+            /* Handles when a query is selected. Fetches and displays the query's results */
+            const handleQueryClicked = queryId => {
+                getQueryResults(queryId).then(displayQueryResults);
+
+                // Highlight selected query in list
+                $(".queries-list").children().removeClass("query-selected")
+                $(`[data-query-id=${queryId}]`).addClass("query-selected");
+            }
+
+            /* Takes a query id and calls ajax GET method to fetch the query's results. Returns a Promise */
+            const getQueryResults = queryId => {
+                return $.ajax({
+                    type: "GET",
+                    url: `api/results/${queryId}`,
+                    error: function(error) {
+                        console.error(error);
+                    }
+                })
+            }
+
+            /* Takes a list of results and displays each result as a row in HTML table */
+            const displayQueryResults = results => {
+                // delete all current rows
+                $(".results-row").remove();
+
+                // Loop through results and display each row to HTML page
+                for (let i = 0; i < results.length; i++) {
+                    const result = results[i];
+                    const resultHtml = 
+                        `<tr class="results-row">
+                            <td>${result.stock}</td>
+                            <td>${result.year}</td>
+                            <td>${result.make}</td>
+                            <td>${result.model}</td>
+                            <td>${result.trim}</td>
+                            <td>${result.price}</td>
+                            <td>${result.extColor}</td>
+                        </tr>`;
+                    $("tbody").append(resultHtml);
+                }
+                
+            }
+
+            const refreshResults = () => {
+                $.ajax({
+                    type: "GET",
+                    url: "api/results/refresh"
+                });
             }
 
             /* Resets form fields */
