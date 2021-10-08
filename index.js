@@ -96,7 +96,11 @@ app.get("/api/results/:queryId", (req, res) => {
             console.error(err);
         }
         else {
-            res.status(200).send(results);
+            const responseData = {
+                results,
+                queryId
+            }
+            res.status(200).send(responseData);
         }
     })
 })

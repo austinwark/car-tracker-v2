@@ -37,4 +37,17 @@ main #side-panel .queries-list li:hover {
   background-color: rgba(0, 0, 0, 0.1);
 }
 
+#meta-panel .customer-details-card h5 {
+  font-size: 16px;
+}
+#meta-panel .customer-details-card h6 {
+  font-size: 14px;
+}
+#meta-panel .customer-details-card p {
+  font-size: 14px;
+}
+#meta-panel .query-settings-card h6 {
+  font-size: 14px;
+}
+
 /*# sourceMappingURL=styles.css.map */

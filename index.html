@@ -64,7 +64,105 @@
 
                 <!-- *** Meta Panel *** -->
                 <section id="meta-panel" class="col-3">
-    
+                    <div class="accordion" id="meta-panel-accordion">
+                        <div class="accordion-item">
+                          <h2 class="accordion-header" id="accordion-heading-one">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                              Query Details
+                            </button>
+                          </h2>
+                          <div id="collapseOne" class="accordion-collapse collapse " aria-labelledby="accordion-heading-one" data-bs-parent="#meta-panel-accordion">
+                            <div class="accordion-body">
+                              <ul class="list-group query-details-list">
+                                  <li class="list-group-item d-flex justify-content-between"><span>Query Name</span><span id="query-details-name"></span></li>
+                                  <li class="list-group-item d-flex justify-content-between"><span>Model</span><span id="query-details-model"></span></li>
+                                  <li class="list-group-item d-flex justify-content-between"><span>Price Range</span><span id="query-details-price"></span></li>
+                                  <li class="list-group-item d-flex justify-content-between"><span>Year Range</span><span id="query-details-year"></span></li>
+                                  <li class="list-group-item d-flex justify-content-between"><span>Results</span><span id="query-details-results"></span></li>
+                                  <li class="list-group-item d-flex justify-content-between"><span>Created</span><span id="query-details-created"></span></li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="accordion-item">
+                          <h2 class="accordion-header" id="accordion-heading-two">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                              Customer Details
+                            </button>
+                          </h2>
+                          <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="accordion-heading-two" data-bs-parent="#meta-panel-accordion">
+                            <div class="accordion-body">
+                                <div class="card customer-details-card">
+                                    <div class="card-header">
+                                        <h5 class="card-title mb-0" id="customer-details-name"></h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle text-muted" id="customer-details-phone"></h6>
+                                        <p class="card-text" id="customer-details-notes"></p>
+                                    </div>
+                                </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="accordion-item">
+                          <h2 class="accordion-header" id="accordion-heading-three">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                              Query Settings
+                            </button>
+                          </h2>
+                          <div id="collapseThree" class="accordion-collapse collapse show" aria-labelledby="accordion-heading-three" data-bs-parent="#meta-panel-accordion">
+                            <div class="accordion-body">
+                                <div class="card query-settings-card">
+                                    <div class="card-body">
+                                        <div class="row my-1">
+                                            <div class="col-9">
+                                                <h6 id="settings-auto-label">Automatic Email Updates</h6>
+                                                <!-- <p>Receive daily email updates with results</p> -->
+                                            </div>
+                                            <div class="col-3">
+                                                <div class="form-check form-switch float-end">
+                                                    <input name="settings-switch-auto" class="form-check-input" type="checkbox" id="settings-switch-auto" aria-labelledby="settings-auto-label"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row my-1">
+                                            <div class="col-9">
+                                                <h6 id="settings-new-label">Send Only New Results</h6>
+                                                <!-- <p>Send unseen results only in email updates</p> -->
+                                            </div>
+                                            <div class="col-3">
+                                                <div class="form-check form-switch float-end">
+                                                    <input name="settings-switch-new" class="form-check-input" type="checkbox" id="settings-switch-new" aria-labelledby="settings-new-label"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row my-1">
+                                            <div class="col-9">
+                                                <h6 id="settings-all-label">Search all dealerships</h6>
+                                                <!-- <p>Check inventory of all Lia dealerships, or just Lia Toyota of Colonie</p> -->
+                                            </div>
+                                            <div class="col-3">
+                                                <div class="form-check form-switch float-end">
+                                                    <input name="settings-switch-all" class="form-check-input" type="checkbox" id="settings-switch-all" aria-labelledby="settings-all-label"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row my-1">
+                                            <div class="col-12">
+                                                <button type="button" class="btn btn-outline-primary btn-sm mb-2">Send to email</button>
+                                            </div>
+                                        </div>
+                                        <div class="row mt-1">
+                                            <div class="col-12">
+                                                <button type="button" class="btn btn-outline-danger btn-sm">Delete</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                 </section>
             </div>
            
@@ -232,13 +330,25 @@
             const displayQueriesList = queries => {
                 const { results } = queries;
                 for (let i = 0; i < results.length; i++) {
-                    const queryListItemHtml = `<li data-query-id=${results[i].queryId}># ${results[i].name}</li>`;
+                    const data = results[i];
+                    const queryListItemHtml = 
+                        `<li data-id=${data.queryId} 
+                            data-name=${data.name} 
+                            data-model=${data.model} 
+                            data-min-price=${data.minPrice} 
+                            data-max-price=${data.maxPrice} 
+                            data-min-year=${data.minYear}
+                            data-max-year=${data.maxYear} 
+                            data-customer-name=${data.customerName ? data.customerName : "null"} 
+                            data-customer-phone=${data.customerPhone ? data.customerPhone : "null"}
+                            data-notes=${data.notes ? data.notes : "null"}># ${data.name}</li>`;
                     $(".queries-list").append(queryListItemHtml);
                 }
                 const firstQueryId = results[0].queryId;
 
                 $(".queries-list").on("click", "li", event => {
-                    const queryId = $(event.currentTarget).data("query-id");
+                    const queryId = $(event.currentTarget).data("id");
+                    console.log(queryId)
                     handleQueryClicked(queryId);
                     
                 });
@@ -252,7 +362,7 @@
 
                 // Highlight selected query in list
                 $(".queries-list").children().removeClass("query-selected")
-                $(`[data-query-id=${queryId}]`).addClass("query-selected");
+                $(`[data-id=${queryId}]`).addClass("query-selected");
             }
 
             /* Takes a query id and calls ajax GET method to fetch the query's results. Returns a Promise */
@@ -267,7 +377,9 @@
             }
 
             /* Takes a list of results and displays each result as a row in HTML table */
-            const displayQueryResults = results => {
+            const displayQueryResults = responseData => {
+                const {results, queryId } = responseData;
+
                 // delete all current rows
                 $(".results-row").remove();
 
@@ -287,6 +399,30 @@
                     $("tbody").append(resultHtml);
                 }
                 
+                displayMetaData(queryId, results.length);
+            }
+
+            const displayMetaData = (queryId, numberOfResults) => {
+                const $queryListItem = $(`li[data-id=${queryId}]`);
+                const name = $queryListItem.data("name");
+                const model = $queryListItem.data("model");
+                const minPrice = $queryListItem.data("min-price");
+                const maxPrice = $queryListItem.data("max-price");
+                const minYear = $queryListItem.data("min-year");
+                const maxYear = $queryListItem.data("max-year");
+                const customerName = $queryListItem.data("customer-name");
+                const customerPhone = $queryListItem.data("customer-phone");
+                const notes = $queryListItem.data("notes");
+
+                $("#query-details-name").text(name);
+                $("#query-details-model").text(model);
+                $("#query-details-price").text(`${minPrice} - ${maxPrice}`);
+                $("#query-details-year").text(`${minYear} - ${maxYear}`);
+                $("#query-details-results").text(numberOfResults);
+                $("#query-details-created").text(); // TODO: save and display created date
+                $("#customer-details-name").html(`${customerName} <i class="bi bi-person-square float-end">`)
+                $("#customer-details-phone").text(customerPhone);
+                $("#customer-details-notes").text(`"${notes}"`);
             }
 
             const refreshResults = () => {
@@ -316,7 +452,6 @@
                 dataObject["all-dealers"] = "all-dealers" in dataObject;
                 dataObject["auto-updates"] = "auto-updates" in dataObject;
 
-                console.log(dataObject);
                 return dataObject;
             }
         </script>

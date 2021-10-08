@@ -48,7 +48,38 @@ main {
 
 
 #results-panel{
+
 } 
 
 #meta-panel {
+    
+    .query-details-list {
+
+        // li {
+        //     font-size: 14px;
+        // }
+        // li span:last-child {
+        //     width: 50%;
+        // }
+    }
+
+    .customer-details-card {
+
+        h5 {
+            font-size: 16px;
+        }
+        h6 {
+            font-size: 14px;
+        }
+        p {
+            font-size: 14px;
+        }
+    }
+
+    .query-settings-card {
+
+        h6 {
+            font-size: 14px;
+        }
+    }
 }
