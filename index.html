@@ -395,7 +395,15 @@
 
       $("#results-refresh-button").on("click", () => {
         const activeQueryId = $(".query-list-item.query-selected").data("id");
-        refreshQueriesAndResults(activeQueryId);
+        $.ajax({
+          type: "GET",
+          url: `api/results/refresh/${activeQueryId}`,
+          success: response => {
+            refreshQueriesAndResults(activeQueryId);
+          }
+        })
+        // if (activeQueryId && activeQueryId != -1) // TODO -- disable button on page load if no results
+        //   refreshQueriesAndResults(activeQueryId);
       })
     });
 
@@ -411,19 +419,23 @@
         success: response01 => {
           const { results } = response01;
           
-          displayQueriesList(results); // Display queries in list
           if (results.length >= 1) {
-
+            displayQueriesList(results); // Display queries in list
             if (activeQueryId == null) {
               setActiveQuery(results[0].queryId);
             } else {
               setActiveQuery(activeQueryId);
-
             }
-            // displayMetaData()
+          } else {
+            clearQueriesAndResultsLists();
           }
         }
       });
+    }
+
+    const clearQueriesAndResultsLists = () => {
+      $(".query-list-item").remove();
+      $(".results-row").remove();
     }
 
     const displayQueriesList = queries => {
@@ -449,7 +461,7 @@
         }
         firstQueryId = queries[0].queryId;
       } else {
-        console.log("displayQueriesList -- NO QUERIES");
+        
       }
 
       let queryId = 11;

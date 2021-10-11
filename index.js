@@ -54,127 +54,119 @@ app.delete("/api/queries/delete/:queryId", (req, res) => {
       res.status(200).send();
     }
   })
-})
-
-// TODO: Restructure so the function operates in this order:
-// 1. Fetch and save results to db
-// 2. Save query to db
-// 3. Returns
-// 4. MAKE SURE NUMBEROFRESULTS ARE SAVED EACH TIME RESULTS ARE SCRAPED
-app.post("/api/queries/submit", (req, res) => {
-
-    // Validate form data
-    const isDataJson = isJson(req.body);
-    if (isDataJson) {
-
-        const data = parseJson(req.body);
-        const sqlQuery = mysql.format("INSERT INTO queries (name, autoUpdates, onlyNew, allDealerships, model, minPrice, maxPrice, minYear, maxYear, customerName, customerPhone, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
-        [data.name, data.autoUpdates, data.onlyNew, data.allDealerships, data.model, data.minPrice, data.maxPrice, data.minYear, data.maxYear, data.customerName, data.customerPhone, data.notes]);
-        // Save query to DB
-        connection.query(sqlQuery, function(err, results) {
-        if (err) {
-            console.log(err);
-            res.status(400).send();
-        } else {
-            // Get query back from DB (with its assigned queryId)
-            const sqlQuery2 = 'SELECT *, DATE_FORMAT(createdDate, "%m/%e/%Y") AS createdDateFormatted FROM queries WHERE queryId = (SELECT LAST_INSERT_ID())';
-            connection.query(sqlQuery2, function(err, results) {
-              if (err) {
-                console.log(err);
-              } else {
-                const { queryId } = results[0];
-
-                // Scrape and save query results to DB. Waits until this is done before sending "done" status to browser
-                try {
-
-                  fetchAndSaveResultsPromise(results[0]).then(numberOfResults => {
-                    updateQueryWithNumberOfResults(queryId, numberOfResults).then(() => {
-                      res.status(200).send({ queryId });
-                    });
-                  });
-                } catch (err) {
-                  console.log(err);
-                  res.status(406).send(err);
-                }
-              }
-            });
-        }
-        });
-    } else {
-        res.status(406).send(); // TODO: is this the right status code?
-    }
 });
 
-function updateQueryWithNumberOfResults(queryId, numberOfResults) {
-  const sqlQuery = mysql.format("UPDATE queries SET numberOfResults = ? WHERE queryId = ?", [numberOfResults, queryId]);
-  return new Promise((resolve, reject) => {
-    connection.query(sqlQuery, function(err) {
-      if (err) {
-        console.error(err);
-        reject(err);
-      } else  {
-        console.log("RESOLVE 2")
-        resolve();
-      }
-    });
-  });
-}
+app.get("/api/results/refresh/:queryId", (req, res) => {
+  try {
+    const queryId = req.params.queryId;
+    const sqlQuery = mysql.format('SELECT *, DATE_FORMAT(createdDate, "%m/%e/%Y") AS createdDateFormatted FROM queries WHERE queryId = ?', [queryId]);
+    // 1) Fetch query by queryId from DB
+    connection.query(sqlQuery, (err, results) => {
+      
+        const data = results[0];
+        // 2) Scrape results first to save numberOfResults to query data row
+        fetchResults(data).then(resultsList => {
+          const numberOfResults = resultsList.length;
+          const sqlQuery = mysql.format("REPLACE INTO queries (queryId, name, autoUpdates, onlyNew, allDealerships, model, minPrice, maxPrice, minYear, maxYear, customerName, customerPhone, notes, numberOfResults) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
+          [queryId, data.name, data.autoUpdates, data.onlyNew, data.allDealerships, data.model, data.minPrice, data.maxPrice, data.minYear, data.maxYear, data.customerName, data.customerPhone, data.notes, numberOfResults]);
+          // 3) Save query to DB
+          connection.query(sqlQuery, (error, results) => {
+            const queryId = results.insertId;
 
-async function fetchAndSaveResultsPromise(query) {
-  const resultsList = [];
+            // 4) Add queryId to each results data
+            const updatedResultsList = resultsList.map(item => {
+              let arr = Object.values(item);
+              arr.unshift(queryId);
+              return arr;
+            });
+            
+            // 5) Save results to DB and then send OK response back to front-end
+            saveResults(updatedResultsList).then(() => {
+              res.status(200).send({ queryId });
+            });
+          });
+        });
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(406).send(error);
+  }
+})
+
+// TODO: MAKE SURE NUMBEROFRESULTS ARE SAVED EACH TIME RESULTS ARE SCRAPED
+app.post("/api/queries/submit", (req, res) => {
+  // 1) Validate form data
+  const isDataJson = isJson(req.body);
+  if (!isDataJson)
+    return;
+
+  const data = parseJson(req.body);
+
+  try {
+    // 2) Scrape results first to save numberOfResults to query data row
+    fetchResults(data).then(resultsList => {
+  
+      const numberOfResults = resultsList.length;
+      const sqlQuery = mysql.format("INSERT INTO queries (name, autoUpdates, onlyNew, allDealerships, model, minPrice, maxPrice, minYear, maxYear, customerName, customerPhone, notes, numberOfResults) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
+      [data.name, data.autoUpdates, data.onlyNew, data.allDealerships, data.model, data.minPrice, data.maxPrice, data.minYear, data.maxYear, data.customerName, data.customerPhone, data.notes, numberOfResults]);
+      // 3) Save query to DB
+      connection.query(sqlQuery, (error, results) => {
+  
+        const queryId = results.insertId;
+        const updatedResultsList = [];
+  
+        // 4) Add queryId to each results data
+        for (let k = 0; k < resultsList.length; k++) {
+          let arr = Object.values(resultsList[k]);
+          arr.unshift(queryId); // Save query id to result row
+          updatedResultsList.push(arr);
+        }
+        
+        // 5) Save results to DB and then send OK response back to front-end
+        saveResults(updatedResultsList).then(() => {
+          res.status(200).send({ queryId });
+        });
+  
+      });
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(406).send(error);
+  }
+});
+
+function fetchAndSaveResultsAndQuery(query) {}
+
+async function fetchResults(query) {
   // Get query results
   const scraper = new Scraper(query);
   const scrapedData = await scraper.getResults();
 
-  // Save array of results into larger array to be passed to SQL query
-  for (let k = 0; k < scrapedData.length; k++) {
-      let arr = Object.values(scrapedData[k]);
-      arr.unshift(query.queryId); // Save query id to result row
-      resultsList.push(arr);
-  }
-  if (resultsList.length < 1)
-      return;
+  return scrapedData;
+}
 
-  // Save each result to results table and replace row if already exists
-  const sql = "REPLACE INTO results (queryId, stock, make, model, year, trim, extColor, price, vin, intColor, transmission, engine, miles, dealer, link, carfaxLink) VALUES ?";
-  const values = resultsList;
-  const numberOfResults = values.length;
+function saveResults(resultsList) {
+
+
 
   return new Promise((resolve, reject) => {
+    console.log(resultsList.length)
+    if (resultsList.length < 1) {
+      resolve();
+      return;
+    }
+    // Save each result to results table and replace row if already exists
+    const sql = "REPLACE INTO results (queryId, stock, make, model, year, trim, extColor, price, vin, intColor, transmission, engine, miles, dealer, link, carfaxLink) VALUES ?";
+    const values = resultsList;
     connection.query(sql, [values], function(err) {
       if (err) {
         console.error(err);
         reject(err);
       } else  {
         console.log("RESOLVE")
-        resolve(numberOfResults);
+        resolve();
       }
     });
-  });
-}
-
-async function fetchAndSaveResults(query) {
-  const resultsList = [];
-  // Get query results
-  const scraper = new Scraper(query);
-  const scrapedData = await scraper.getResults();
-
-  // Save array of results into larger array to be passed to SQL query
-  for (let k = 0; k < scrapedData.length; k++) {
-      let arr = Object.values(scrapedData[k]);
-      arr.unshift(query.queryId); // Save query id to result row
-      resultsList.push(arr);
-  }
-  if (resultsList.length < 1)
-      return;
-
-  // Save each result to results table and replace row if already exists
-  const sql = "REPLACE INTO results (queryId, stock, make, model, year, trim, extColor, price, vin, intColor, transmission, engine, miles, dealer, link, carfaxLink) VALUES ?";
-  const values = resultsList;
-  connection.query(sql, [values], function(err) {
-      if (err)
-          console.error(err);
-      
   });
 }
 
