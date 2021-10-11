@@ -55,8 +55,11 @@
 
       <!-- *** Results Panel *** -->
       <section id="results-panel" class="col-6">
-        <h2 class="text-center">Query Results</h2>
-        <table class="table table-hover w-100">
+        <div class="d-flex justify-content-between align-items-center">
+          <h2>Query Results</h2>
+          <button type="button" class="btn btn-sm btn-info" id="results-refresh-button"><i class="bi bi-arrow-repeat"></i> Refresh</button>
+        </div>
+        <table class="table table-sm table-bordered table-success table-hover w-100">
           <thead>
             <tr>
               <th scope="col">Stock #</th>
@@ -390,11 +393,10 @@
         event.preventDefault();
       });
 
-      const clearHistoryBtn = `
-          <span>All records will be removed</span>
-          <button type="button" class="confirm-clear-history btn btn-sm btn-danger" onclick="alert('event raised from yes button');">Yes</button>
-          <button type="button" class="btn btn-sm btn-link" onclick="alert('event raised from no button');">No</button>
-      `;
+      $("#results-refresh-button").on("click", () => {
+        const activeQueryId = $(".query-list-item.query-selected").data("id");
+        refreshQueriesAndResults(activeQueryId);
+      })
     });
 
     /* Fetches and displays all queries, then fetches and displays the query's results. */
