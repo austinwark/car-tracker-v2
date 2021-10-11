@@ -109,7 +109,7 @@ module.exports = class Scraper {
             
             try {
                 const response = await axios.get(siteUrl);
-                console.log(response.status);
+                console.log(siteUrl);
                 counter++;
                 if (response.status >= 200 && response.status <= 299) {
 
