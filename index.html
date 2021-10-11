@@ -154,7 +154,7 @@
                       <div class="col-3">
                         <div class="form-check form-switch float-end">
                           <input name="settings-switch-auto" class="form-check-input" type="checkbox"
-                            id="settings-switch-auto" aria-labelledby="settings-auto-label" />
+                            id="settings-switch-auto" aria-labelledby="settings-auto-label" disabled />
                         </div>
                       </div>
                     </div>
@@ -166,7 +166,7 @@
                       <div class="col-3">
                         <div class="form-check form-switch float-end">
                           <input name="settings-switch-new" class="form-check-input" type="checkbox"
-                            id="settings-switch-new" aria-labelledby="settings-new-label" />
+                            id="settings-switch-new" aria-labelledby="settings-new-label" disabled />
                         </div>
                       </div>
                     </div>
@@ -180,7 +180,7 @@
                       <div class="col-3">
                         <div class="form-check form-switch float-end">
                           <input name="settings-switch-all" class="form-check-input" type="checkbox"
-                            id="settings-switch-all" aria-labelledby="settings-all-label" />
+                            id="settings-switch-all" aria-labelledby="settings-all-label" disabled />
                         </div>
                       </div>
                     </div>
@@ -548,30 +548,23 @@
     }
 
     const displayMetaData = (query) => {
-      const { queryId } = query;
-      const { numberOfResults } = query;
-      const { createdDateFormatted } = query;
-
-      const $queryListItem = $(`li[data-id=${queryId}]`);
-      const name = $queryListItem.data("name");
-      const model = $queryListItem.data("model");
-      const minPrice = $queryListItem.data("min-price");
-      const maxPrice = $queryListItem.data("max-price");
-      const minYear = $queryListItem.data("min-year");
-      const maxYear = $queryListItem.data("max-year");
-      const customerName = $queryListItem.data("customer-name");
-      const customerPhone = $queryListItem.data("customer-phone");
-      const notes = $queryListItem.data("notes");
-
+      const { queryId, numberOfResults, name, model, minPrice,
+         maxPrice, minYear, maxYear, customerName, customerPhone, 
+         notes, autoUpdates, onlyNew, allDealerships, createdDateFormatted } = query;
+      
       $("#query-details-name").text(name);
       $("#query-details-model").text(model);
       $("#query-details-price").text(`${minPrice} - ${maxPrice}`);
       $("#query-details-year").text(`${minYear} - ${maxYear}`);
-      $("#query-details-results").text(numberOfResults);
+      $("#query-details-results").text(numberOfResults || "0");
       $("#query-details-created").text(createdDateFormatted);
       $("#customer-details-name").html(`${customerName} <i class="bi bi-person-square float-end">`)
       $("#customer-details-phone").text(customerPhone);
       $("#customer-details-notes").text(`"${notes}"`);
+
+      $("#settings-switch-auto").prop("checked", autoUpdates);
+      $("#settings-switch-new").prop("checked", onlyNew);
+      $("#settings-switch-all").prop("checked", allDealerships);
     }
 
     /* Resets form fields */
