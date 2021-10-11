@@ -20,7 +20,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/api/queries/all", (req, res) => {
-    const sqlQuery = "SELECT * FROM queries";
+    const sqlQuery = 'SELECT *, DATE_FORMAT(createdDate, "%m/%e/%Y") AS createdDateFormatted FROM queries';
     // Get all queries from queries table
     connection.query(sqlQuery, async function(err, results) {
         if (err) {
@@ -34,7 +34,7 @@ app.get("/api/queries/all", (req, res) => {
 
 app.get("/api/queries/:queryId", (req, res) => {
   const queryId = req.params.queryId;
-  const sqlQuery = mysql.format("SELECT * FROM queries WHERE queryId = ?", [queryId]);
+  const sqlQuery = mysql.format('SELECT *, DATE_FORMAT(createdDate, "%m/%e/%Y") AS createdDateFormatted FROM queries WHERE queryId = ?', [queryId]);
   connection.query(sqlQuery, function(err, results) {
     if (err) {
       console.error(err);
@@ -60,6 +60,7 @@ app.delete("/api/queries/delete/:queryId", (req, res) => {
 // 1. Fetch and save results to db
 // 2. Save query to db
 // 3. Returns
+// 4. MAKE SURE NUMBEROFRESULTS ARE SAVED EACH TIME RESULTS ARE SCRAPED
 app.post("/api/queries/submit", (req, res) => {
 
     // Validate form data
@@ -76,7 +77,7 @@ app.post("/api/queries/submit", (req, res) => {
             res.status(400).send();
         } else {
             // Get query back from DB (with its assigned queryId)
-            const sqlQuery2 = "SELECT * FROM queries WHERE queryId = (SELECT LAST_INSERT_ID())";
+            const sqlQuery2 = 'SELECT *, DATE_FORMAT(createdDate, "%m/%e/%Y") AS createdDateFormatted FROM queries WHERE queryId = (SELECT LAST_INSERT_ID())';
             connection.query(sqlQuery2, function(err, results) {
               if (err) {
                 console.log(err);

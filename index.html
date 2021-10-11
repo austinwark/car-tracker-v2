@@ -550,6 +550,8 @@
     const displayMetaData = (query) => {
       const { queryId } = query;
       const { numberOfResults } = query;
+      const { createdDateFormatted } = query;
+
       const $queryListItem = $(`li[data-id=${queryId}]`);
       const name = $queryListItem.data("name");
       const model = $queryListItem.data("model");
@@ -566,7 +568,7 @@
       $("#query-details-price").text(`${minPrice} - ${maxPrice}`);
       $("#query-details-year").text(`${minYear} - ${maxYear}`);
       $("#query-details-results").text(numberOfResults);
-      $("#query-details-created").text(); // TODO: save and display created date
+      $("#query-details-created").text(createdDateFormatted);
       $("#customer-details-name").html(`${customerName} <i class="bi bi-person-square float-end">`)
       $("#customer-details-phone").text(customerPhone);
       $("#customer-details-notes").text(`"${notes}"`);
