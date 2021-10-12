@@ -75,6 +75,7 @@
             <!-- Results -->
           </tbody>
         </table>
+        <h5 id="no-results-msg">No results...</h5>
       </section>
 
       <!-- *** Meta Panel *** -->
@@ -428,14 +429,17 @@
             }
           } else {
             clearQueriesAndResultsLists();
+            $("#results-refresh-button").prop("disabled", true);
           }
         }
       });
     }
 
+    /* Clears queries and results, and shows no results message */
     const clearQueriesAndResultsLists = () => {
       $(".query-list-item").remove();
       $(".results-row").remove();
+      $("#no-results-msg").show();
     }
 
     const displayQueriesList = queries => {
@@ -534,31 +538,36 @@
 
     /* Takes a list of results and displays each result as a row in HTML table */
     const displayQueryResults = queryResults => {
-      if (queryResults === null) {
-        $(".results-row").remove();
-      }
       const { results, queryId } = queryResults;
+      if (results === null || results.length < 1) {
 
-      // delete all current rows
-      $(".results-row").remove();
-
-      // Loop through results and display each row to HTML page
-      for (let i = 0; i < results.length; i++) {
-        const result = results[i];
-        const resultHtml =
-          `<tr class="results-row">
-                                  <td>${result.stock}</td>
-                                  <td>${result.year}</td>
-                                  <td>${result.make}</td>
-                                  <td>${result.model}</td>
-                                  <td>${result.trim}</td>
-                                  <td>${result.price}</td>
-                                  <td>${result.extColor}</td>
-                              </tr>`;
-        $("tbody").append(resultHtml);
+        // Clear all results and show no results message
+        $(".results-row").remove();
+        $("#no-results-msg").show();
+      } else {
+        
+        // Clear all results and hide no results messageg
+        $(".results-row").remove();
+        $("#no-results-msg").hide();
+  
+        // Loop through results and display each row to HTML page
+        for (let i = 0; i < results.length; i++) {
+          const result = results[i];
+          const resultHtml =
+            `<tr class="results-row">
+                                    <td>${result.stock}</td>
+                                    <td>${result.year}</td>
+                                    <td>${result.make}</td>
+                                    <td>${result.model}</td>
+                                    <td>${result.trim}</td>
+                                    <td>${result.price}</td>
+                                    <td>${result.extColor}</td>
+                                </tr>`;
+          $("tbody").append(resultHtml);
+        }
       }
 
-      // displayMetaData(queryId, results.length);
+      $("#results-refresh-button").prop("disabled", false);
     }
 
     const displayMetaData = (query) => {
