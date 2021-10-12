@@ -468,16 +468,23 @@
     });
 
     const displayCarouselSlides = (results, activeVin) => {
-      return results.map(result => {
+      const numberOfResults = results.length;
+      return results.map((result, i) => {
+        
         const slideHtml = `
           <div class="carousel-item ${result.vin == activeVin && "active"}">
-            <div class="w-75 m-auto d-flex justify-content-between">
-              <div class="d-flex flex-column">
-                <i class="fas fa-car"></i>
-                <a class="btn btn-secondary btn-sm my-1" role="button" href=${result.link} target="_blank">See More</a>
-                <a class="btn btn-secondary btn-sm my-1" role="button" href=${result.carfaxLink} target="_blank">CarFax</a>
+            <div class="w-75 m-auto d-flex justify-content-center">
+              <span id="carousel-item-counter"><strong>${i + 1}/${numberOfResults}</strong></span>
+              <div class="d-flex flex-column justify-content-between m-2">
+                <div>
+                  <img src=${result.imageLink} id="result-details-image" />
+                </div>
+                <div class="d-flex flex-column">
+                  <a class="btn btn-secondary btn-sm my-1" role="button" href=${result.link} target="_blank">See More</a>
+                  <a class="btn btn-secondary btn-sm my-1" role="button" href=${result.carfaxLink} target="_blank">CarFax</a>
+                </div>
               </div>
-              <div class="d-flex flex-column">
+              <div class="d-flex flex-column m-2">
                 <span id="result-details-title"><strong>${result.year} ${result.make} ${result.model} ${result.trim}</strong></span>
                 <span><strong>Lia Price:</strong> ${result.price}</span>
                 <span><strong>Engine:</strong> ${result.engine}</span>

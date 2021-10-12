@@ -64,6 +64,12 @@ module.exports = class Scraper {
             carfaxLinks.push(carfax);
         });
 
+        const imageLinks = [];
+        $(".vehicleImgColumn .vehiclePhoto img.vehicleImg").each((i, el) => {
+          const imageLink = "https://www.liatoyotaofcolonie.com" + $(el).prop("src");
+          imageLinks.push(imageLink);
+        })
+
         let resultsList = [];
 
         resultsList = vehicles.map((el, i) => {
@@ -82,7 +88,8 @@ module.exports = class Scraper {
                 miles: miles[i],
                 dealer: dealers[i],
                 link: links[i],
-                carfaxLink: carfaxLinks[i]
+                carfaxLink: carfaxLinks[i],
+                imageLink: imageLinks[i]
             };
         });
 

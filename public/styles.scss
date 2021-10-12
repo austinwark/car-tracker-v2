@@ -8,6 +8,7 @@
   --blue-ncs: #0090c1ff;
   --rufous: #a30000ff;
   --maroon-x-11: #b7245cff;
+  --maroon-x-11-dulled: #b7245caa;
 
   --primary-bg-color: var(--space-cadet);
   --primary-text-color: var(--alice-blue);
@@ -16,11 +17,11 @@
   --secondary-text-color: var(--space-cadet);
 }
 .btn-primary {
-  background-color: #B7245C !important;
+  background-color: var(--maroon-x-11) !important;
   border: none !important;
 }
 .btn-primary:hover {
-    background-color: #B7245CAA !important;
+    background-color: var(--maroon-x-11-dulled) !important;
 }
 .btn-secondary {
     background-color: #0090C1 !important;
@@ -51,13 +52,17 @@ Three color scheme:
 
 #result-details-modal {
   .modal-dialog {
-    max-width: 700px;
+    max-width: 900px;
 
     .modal-content {
       
   
       .carousel-item {
 
+        #result-details-image {
+          width: 160px;
+          height: 120px;
+        }
         .fa-car {
           font-size: 8rem;
         }
@@ -73,6 +78,13 @@ Three color scheme:
         background-color: #dee7e7AA;
         padding: 16px;
         border-radius: 0.3rem;
+        position: relative;
+        #carousel-item-counter {
+          position: absolute;
+          top: 1rem;
+          right: 1rem;
+          color: var(--maroon-x-11);
+        }
       }
       .carousel-control-next-icon, .carousel-control-prev-icon {
         background: none;

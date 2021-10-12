@@ -146,9 +146,6 @@ async function fetchResults(query) {
 }
 
 function saveResults(resultsList) {
-
-
-
   return new Promise((resolve, reject) => {
     console.log(resultsList.length)
     if (resultsList.length < 1) {
@@ -156,7 +153,7 @@ function saveResults(resultsList) {
       return;
     }
     // Save each result to results table and replace row if already exists
-    const sql = "REPLACE INTO results (queryId, stock, make, model, year, trim, extColor, price, vin, intColor, transmission, engine, miles, dealer, link, carfaxLink) VALUES ?";
+    const sql = "REPLACE INTO results (queryId, stock, make, model, year, trim, extColor, price, vin, intColor, transmission, engine, miles, dealer, link, carfaxLink, imageLink) VALUES ?";
     const values = resultsList;
     connection.query(sql, [values], function(err) {
       if (err) {
