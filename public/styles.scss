@@ -1,27 +1,67 @@
 /* Theming */
+
+:root {
+  --space-cadet: #2b2d42ff;
+  --platinum: #dee7e7ff;
+  --alice-blue: #f4faffff;
+  --cinnabar: #dc493aff;
+  --cedar-chest: #db504aff;
+  --blue-ncs: #0090c1ff;
+
+  --primary-bg-color: var(--space-cadet);
+  --primary-text-color: var(--alice-blue);
+  --primary-text-color-dulled: #F4FAFFBB; /* Alice Blue opacity lowered */
+  --secondary-bg-color: var(--platinum);
+  --secondary-text-color: var(--space-cadet);
+}
 .btn-primary {
-    background-color: #8D5DB4;
+  background-color: #B7245C !important;
+  border: none !important;
 }
-
 .btn-primary:hover {
-    background-color: #664482;
+    background-color: #B7245CAA !important;
 }
-
+.btn-secondary {
+    background-color: #0090C1 !important;
+    border: none !important;
+}
+.btn-secondary:hover {
+  background-color: #0090C1AA !important;
+}
+.btn-danger {
+  background-color: #A30000 !important;
+}
+.btn-danger:hover {
+  background-color: #A30000AA !important;
+}
+body {
+  font-family: "Open Sans", sans-serif; 
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Oxygen', sans-serif;
+  font-weight: 700;
+}
+/*
+Three color scheme:
+  1) #98506D
+  2) #D0605E
+  3) #FF994C
+*/
 main {
     height: 100vh;
     display: flex;
     padding: 0 !important;
-    background-color: #E1E7E4;
 
     #side-panel {
-        background-color: #9497B0;
+        background-color: var(--primary-bg-color);
+        color: var(--primary-text-color);
 
         .bi-search {
-            font-size: 40px;
+            font-size: 2.4rem;
         }
 
         h2 {
-            font-size: 20px;
+            font-size: 1.2rem;
         }
 
         #create-offcanvas-button {
@@ -32,54 +72,93 @@ main {
             list-style: none;
             cursor: pointer;
 
-            .query-selected {
+            .card {
+              background-color: var(--primary-text-color-dulled);
+              color: var(--secondary-text-color);
+
+              #query-item-name {
+                font-size: 1rem;
+                width: auto;
+              }
+
+              #query-item-model {
+                font-size: .8rem;
+                width: auto;
+              }
+
+              #query-item-number {
+                z-index: 122;
+                color: #000;
+                position: relative;
+                background-color: var(--secondary-bg-color);
+                color: var(--secondary-text-color);
+              }
+              
+            }
+
+            .query-selected .card {
                 font-weight: 700;
+                background-color: var(--primary-text-color);
             }
 
-            li:hover {
-                color: #FAFAFAAF;
-                background-color: rgba(0, 0, 0, 0.1);
-            }
         }
     
     }
+
+    #results-panel {
+      background-color: var(--secondary-bg-color);
+      color: var(--secondary-text-color);
+
+      #results-table {
+        background-color: var(--primary-text-color);
+
+        td {
+          padding: 12px 6px;
+        }
+      }
+    }
+
+    #meta-panel {
+      background-color: var(--secondary-bg-color);
+      color: var(--secondary-text-color);
+
+      #meta-panel-accordion .accordion-item *{
+        background-color: var(--primary-text-color);
+      }
+      .accordion-button:not(.collapsed) {
+        color: #0090C1;
+      }
+      .query-details-list {
+  
+          // li {
+          //     font-size: 14px;
+          // }
+          // li span:last-child {
+          //     width: 50%;
+          // }
+      }
+  
+      .customer-details-card {
+  
+          h5 {
+              font-size: 1rem;
+          }
+          h6 {
+              font-size: .8rem;
+          }
+          p {
+              font-size: .8rem;
+          }
+      }
+  
+      .query-settings-card {
+  
+          p {
+              font-size: .8rem;
+          }
+      }
+  }
 }
 
 
 
-#results-panel{
-
-} 
-
-#meta-panel {
-    
-    .query-details-list {
-
-        // li {
-        //     font-size: 14px;
-        // }
-        // li span:last-child {
-        //     width: 50%;
-        // }
-    }
-
-    .customer-details-card {
-
-        h5 {
-            font-size: 16px;
-        }
-        h6 {
-            font-size: 14px;
-        }
-        p {
-            font-size: 14px;
-        }
-    }
-
-    .query-settings-card {
-
-        h6 {
-            font-size: 14px;
-        }
-    }
-}
