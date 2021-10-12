@@ -51,7 +51,7 @@
           <div class="col-12 text-center">
             <button id="create-offcanvas-button" type="button" class="btn btn-primary" data-bs-toggle="offcanvas"
               data-bs-target="#create-offcanvas">
-              Create
+              <i class="bi bi-pencil-square" id="create-icon"></i> Create
             </button>
           </div>
         </div>
@@ -61,8 +61,12 @@
       <section id="results-panel" class="col-6">
         <div class="d-flex justify-content-between align-items-center">
           <h2 class="py-2">Query Results</h2>
-          <button type="button" class="btn btn-sm btn-primary" id="results-refresh-button"><i
-              class="bi bi-arrow-repeat"></i> Refresh</button>
+          <button type="button" class="btn btn-sm btn-primary" id="results-refresh-button">
+            <span id="refresh-loader">
+              <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+              <span class="visually-hidden">Loading...</span>
+            </span>
+            <i class="bi bi-arrow-repeat" id="refresh-icon"></i> Refresh</button>
         </div>
         <table class="table table-sm table-hover w-100" id="results-table">
           <thead>
@@ -316,7 +320,13 @@
             <input name="notes" class="form-control form-control-sm" id="create-input-customer-notes" type="text" value="Austin needs this ASAP!" />
           </div>
           <div class="col-12 my-1 text-center">
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="submit" class="btn btn-primary">
+              <span id="submit-loader">
+                <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                <span class="visually-hidden">Loading...</span>
+              </span>
+              <i class="bi bi-cloud-arrow-up" id="submit-icon"></i> Submit
+            </button>
           </div>
         </form>
       </div>
@@ -383,15 +393,16 @@
     crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/overlayscrollbars/1.13.1/js/jquery.overlayScrollbars.js" integrity="sha512-v6YPVQdeRVcdt+KmeSBDWcsxqLP6rlTVC2mxuBHrGUv05Q/hES67JwEfYNDSqPHLZmfTYbbIYVZbXElzgI+RkQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://kit.fontawesome.com/df2f487a5e.js" crossorigin="anonymous"></script>
   <script>
     $("document").ready(() => {
 
       refreshQueriesAndResults();
 
+      $("#submit-loader").hide();
+      $("#refresh-loader").hide();
+
       $(".offcanvas-body").overlayScrollbars({
         resize: "vertical"
-
       });
 
       // Focuses first input in form
@@ -420,6 +431,9 @@
       });
 
       $("#create-form").submit(event => {
+        $("#submit-icon").hide();
+        $("#submit-loader").show();
+        
         const formData = convertFormToJson($("#create-form"));
         $.ajax({
           type: "POST",
@@ -428,8 +442,9 @@
           contentType: "application/json;charset=UTF-8",
           success: function (data) {
             let { queryId } = data;
-            console.log(queryId);
             clearFormData();
+            $("#submit-icon").show();
+            $("#submit-loader").hide();
             refreshQueriesAndResults(queryId);
             $(".offcanvas").removeClass("show");
           },
@@ -443,10 +458,14 @@
 
       $("#results-refresh-button").on("click", () => {
         const activeQueryId = $(".query-list-item.query-selected").data("id");
+        $("#refresh-icon").hide();
+        $("#refresh-loader").show();
         $.ajax({
           type: "GET",
           url: `api/results/refresh/${activeQueryId}`,
           success: response => {
+            $("#refresh-icon").show();
+          $("#refresh-loader").hide();
             refreshQueriesAndResults(activeQueryId);
           }
         });
