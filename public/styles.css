@@ -42,6 +42,11 @@
   background-color: #A30000AA !important;
 }
 
+.badge-secondary {
+  background-color: #0090C1AA !important;
+  color: var(--secondary-text-color) !important;
+}
+
 body {
   font-family: "Open Sans", sans-serif;
 }
@@ -142,6 +147,7 @@ main #results-panel {
 }
 main #results-panel #results-table {
   background-color: var(--primary-text-color);
+  border-radius: 0.2rem;
 }
 main #results-panel #results-table td {
   padding: 12px 6px;
@@ -150,7 +156,7 @@ main #meta-panel {
   background-color: var(--secondary-bg-color);
   color: var(--secondary-text-color);
 }
-main #meta-panel #meta-panel-accordion .accordion-item * {
+main #meta-panel #meta-panel-accordion .accordion-item div {
   background-color: var(--primary-text-color);
 }
 main #meta-panel .accordion-button:not(.collapsed) {
@@ -166,7 +172,7 @@ main #meta-panel .customer-details-card p {
   font-size: 0.8rem;
 }
 main #meta-panel .query-settings-card p {
-  font-size: 0.8rem;
+  font-size: 1rem;
 }
 
 /*# sourceMappingURL=styles.css.map */

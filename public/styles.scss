@@ -36,6 +36,10 @@
 .btn-danger:hover {
   background-color: #A30000AA !important;
 }
+.badge-secondary {
+  background-color: #0090C1AA !important;
+  color: var(--secondary-text-color) !important;
+}
 body {
   font-family: "Open Sans", sans-serif; 
 }
@@ -159,7 +163,7 @@ main {
 
       #results-table {
         background-color: var(--primary-text-color);
-
+        border-radius: 0.2rem;
         td {
           padding: 12px 6px;
         }
@@ -170,7 +174,7 @@ main {
       background-color: var(--secondary-bg-color);
       color: var(--secondary-text-color);
 
-      #meta-panel-accordion .accordion-item *{
+      #meta-panel-accordion .accordion-item div {
         background-color: var(--primary-text-color);
       }
       .accordion-button:not(.collapsed) {
@@ -202,9 +206,9 @@ main {
       .query-settings-card {
   
           p {
-              font-size: .8rem;
+              font-size: 1rem;
           }
-      }
+        }
   }
 }
 
