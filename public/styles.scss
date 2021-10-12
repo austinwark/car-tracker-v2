@@ -4,9 +4,10 @@
   --space-cadet: #2b2d42ff;
   --platinum: #dee7e7ff;
   --alice-blue: #f4faffff;
-  --cinnabar: #dc493aff;
   --cedar-chest: #db504aff;
   --blue-ncs: #0090c1ff;
+  --rufous: #a30000ff;
+  --maroon-x-11: #b7245cff;
 
   --primary-bg-color: var(--space-cadet);
   --primary-text-color: var(--alice-blue);
@@ -47,6 +48,41 @@ Three color scheme:
   2) #D0605E
   3) #FF994C
 */
+
+#result-details-modal {
+  .modal-dialog {
+    max-width: 700px;
+
+    .modal-content {
+      
+  
+      .carousel-item {
+
+        .fa-car {
+          font-size: 8rem;
+        }
+        span {
+          font-size: 0.9rem;
+        }
+        #result-details-title {
+          font-size: 1.2rem;
+        }
+
+      } 
+      .carousel-item > div {
+        background-color: #dee7e7AA;
+        padding: 16px;
+        border-radius: 0.3rem;
+      }
+      .carousel-control-next-icon, .carousel-control-prev-icon {
+        background: none;
+        color: #000;
+        font-size: 3rem;
+      }
+    }
+  }
+}
+
 main {
     height: 100vh;
     display: flex;
