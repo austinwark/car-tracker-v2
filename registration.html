@@ -84,13 +84,14 @@
             }
 
             getAllUsers().then(users => {
-              console.log(users);
               if (users.find(user => user.email === email)) {
                 showDangerAlert("Email already in use.");
               } else {
                 hideAlerts();
                 $("#registration-form").submit();
               }
+            }).catch(err => {
+              console.log(err)
             }); 
           });
           

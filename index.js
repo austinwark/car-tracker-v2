@@ -31,8 +31,11 @@ connection.connect();
 /* Authentication middleware to check session before proceeding to next call */
 const authMiddleware = (req, res, next) => {
 
-  if (!req.session)
+  if (!req.session || !req.session.email || !req.session.userId) {
+    res.redirect("/login");
     return;
+  }
+    
 
   getAllUsers().then(users => {
 
@@ -48,7 +51,6 @@ const authMiddleware = (req, res, next) => {
 /* Called by /login and /registration to validate form data before submitting form. */
 app.post("/api/users/auth", (req, res) => {
   const { email, password } = req.body;
-  console.log(email, password);
   const hashedPassword = getHashedPassword(password);
 
   const sqlQuery = mysql.format("SELECT * FROM USERS WHERE email = ?", [email]);
@@ -57,7 +59,6 @@ app.post("/api/users/auth", (req, res) => {
       console.log(err);
       res.status(406).send("Server error, please try again later.");
     } else if (results.length == 0) {
-      console.log("Account with that email does not exist.");
       res.status(401).send("Account with that email does not exist.");
     } else {
       const user = results[0];
@@ -81,15 +82,12 @@ app.get("/api/users/all", (req, res) => {
 /* Used to get logged-in user's email from session */
 app.get("/api/users/active", (req, res) => {
   if (req.session && req.session.email) {
-    console.log("+++")
-    console.log(req.session.email);
     res.status(200).send({ email: req.session.email });
   }
 });
 
 app.post("/api/users/changePassword", (req, res) => {
   const { password, confirmPassword } = req.body;
-  console.log("CHANGE PASS")
   if (req.session && req.session.email) {
 
     const hashedPassword = getHashedPassword(password);
@@ -123,12 +121,12 @@ app.post("/login", (req, res) => {
     if (err) {
       res.redirect("/login?err=406");
     } else if (results.length == 0) {
-      console.log("User not found");
       res.redirect("/login?err=404");
     } else {
       const user = results[0];
       if (hashedPassword === user.password) {
         req.session.email = email;
+        req.session.userId = user.userId;
         res.redirect("/");
       } else {
         res.redirect("/login?err=401");
@@ -140,7 +138,6 @@ app.post("/login", (req, res) => {
 /* Called on registration form submit. Validates form data one more time. */
 app.post("/registration", (req, res) => {
   const { email, password, confirmPassword } = req.body;
-  
     const userId = uuidv1();
     const hashedPassword = getHashedPassword(password);
 
@@ -181,8 +178,10 @@ app.get("/", authMiddleware, (req, res) => {
   res.sendFile(__dirname + "/index.html");
 });
 
-app.get("/api/queries/all", (req, res) => {
-    const sqlQuery = 'SELECT *, DATE_FORMAT(createdDate, "%m/%e/%Y") AS createdDateFormatted FROM queries';
+app.get("/api/queries/all", authMiddleware, (req, res) => {
+    const userId = req.session.userId;
+
+    const sqlQuery = mysql.format('SELECT *, DATE_FORMAT(createdDate, "%m/%e/%Y") AS createdDateFormatted FROM queries WHERE userId = ?', [userId]);
     // Get all queries from queries table
     connection.query(sqlQuery, async function(err, results) {
         if (err) {
@@ -194,9 +193,11 @@ app.get("/api/queries/all", (req, res) => {
     })
 });
 
-app.get("/api/queries/:queryId", (req, res) => {
+app.get("/api/queries/:queryId", authMiddleware, (req, res) => {
+  const userId = req.session.userId;
   const queryId = req.params.queryId;
-  const sqlQuery = mysql.format('SELECT *, DATE_FORMAT(createdDate, "%m/%e/%Y") AS createdDateFormatted FROM queries WHERE queryId = ?', [queryId]);
+
+  const sqlQuery = mysql.format('SELECT *, DATE_FORMAT(createdDate, "%m/%e/%Y") AS createdDateFormatted FROM queries WHERE queryId = ? AND userId = ?', [queryId, userId]);
   connection.query(sqlQuery, function(err, results) {
     if (err) {
       console.error(err);
@@ -206,7 +207,7 @@ app.get("/api/queries/:queryId", (req, res) => {
   })
 });
 
-app.delete("/api/queries/delete/:queryId", (req, res) => {
+app.delete("/api/queries/delete/:queryId", authMiddleware, (req, res) => {
   const queryId = req.params.queryId;
   const sqlQuery = mysql.format("DELETE FROM queries WHERE queryId = ?", [queryId]);
   connection.query(sqlQuery, function(err, results) {
@@ -218,10 +219,12 @@ app.delete("/api/queries/delete/:queryId", (req, res) => {
   })
 });
 
-app.get("/api/results/refresh/:queryId", (req, res) => {
+app.get("/api/results/refresh/:queryId", authMiddleware, (req, res) => {
   try {
+    const userId = req.session.userId;
     const queryId = req.params.queryId;
-    const sqlQuery = mysql.format('SELECT *, DATE_FORMAT(createdDate, "%m/%e/%Y") AS createdDateFormatted FROM queries WHERE queryId = ?', [queryId]);
+
+    const sqlQuery = mysql.format('SELECT *, DATE_FORMAT(createdDate, "%m/%e/%Y") AS createdDateFormatted FROM queries WHERE queryId = ? AND userId = ?', [queryId, userId]);
     // 1) Fetch query by queryId from DB
     connection.query(sqlQuery, (err, results) => {
       
@@ -229,8 +232,8 @@ app.get("/api/results/refresh/:queryId", (req, res) => {
         // 2) Scrape results first to save numberOfResults to query data row
         fetchResults(data).then(resultsList => {
           const numberOfResults = resultsList.length;
-          const sqlQuery = mysql.format("REPLACE INTO queries (queryId, name, autoUpdates, onlyNew, allDealerships, model, minPrice, maxPrice, minYear, maxYear, customerName, customerPhone, notes, numberOfResults) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
-          [queryId, data.name, data.autoUpdates, data.onlyNew, data.allDealerships, data.model, data.minPrice, data.maxPrice, data.minYear, data.maxYear, data.customerName, data.customerPhone, data.notes, numberOfResults]);
+          const sqlQuery = mysql.format("REPLACE INTO queries (queryId, userId, name, autoUpdates, onlyNew, allDealerships, model, minPrice, maxPrice, minYear, maxYear, customerName, customerPhone, notes, numberOfResults) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
+          [queryId, userId, data.name, data.autoUpdates, data.onlyNew, data.allDealerships, data.model, data.minPrice, data.maxPrice, data.minYear, data.maxYear, data.customerName, data.customerPhone, data.notes, numberOfResults]);
           // 3) Save query to DB
           connection.query(sqlQuery, (error, results) => {
             const queryId = results.insertId;
@@ -256,7 +259,7 @@ app.get("/api/results/refresh/:queryId", (req, res) => {
 })
 
 // TODO: MAKE SURE NUMBEROFRESULTS ARE SAVED EACH TIME RESULTS ARE SCRAPED
-app.post("/api/queries/submit", (req, res) => {
+app.post("/api/queries/submit", authMiddleware, (req, res) => {
   // 1) Validate form data
   const isDataJson = isJson(req.body);
   if (!isDataJson) {
@@ -264,18 +267,21 @@ app.post("/api/queries/submit", (req, res) => {
     return;
   }
 
+  const userId = req.session.userId;
   const data = parseJson(req.body);
-
   try {
     // 2) Scrape results first to save numberOfResults to query data row
     fetchResults(data).then(resultsList => {
   
       const numberOfResults = resultsList.length;
-      const sqlQuery = mysql.format("INSERT INTO queries (name, autoUpdates, onlyNew, allDealerships, model, minPrice, maxPrice, minYear, maxYear, customerName, customerPhone, notes, numberOfResults) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
-      [data.name, data.autoUpdates, data.onlyNew, data.allDealerships, data.model, data.minPrice, data.maxPrice, data.minYear, data.maxYear, data.customerName, data.customerPhone, data.notes, numberOfResults]);
+      const sqlQuery = mysql.format("INSERT INTO queries (userId, name, autoUpdates, onlyNew, allDealerships, model, minPrice, maxPrice, minYear, maxYear, customerName, customerPhone, notes, numberOfResults) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
+      [userId, data.name, data.autoUpdates, data.onlyNew, data.allDealerships, data.model, data.minPrice, data.maxPrice, data.minYear, data.maxYear, data.customerName, data.customerPhone, data.notes, numberOfResults]);
       // 3) Save query to DB
       connection.query(sqlQuery, (error, results) => {
-  
+        if (error) {
+          console.log(error);
+          return;
+        }
         const queryId = results.insertId;
         const updatedResultsList = [];
   
@@ -299,8 +305,6 @@ app.post("/api/queries/submit", (req, res) => {
   }
 });
 
-function fetchAndSaveResultsAndQuery(query) {}
-
 async function fetchResults(query) {
   // Get query results
   const scraper = new Scraper(query);
@@ -311,7 +315,6 @@ async function fetchResults(query) {
 
 function saveResults(resultsList) {
   return new Promise((resolve, reject) => {
-    console.log(resultsList.length)
     if (resultsList.length < 1) {
       resolve();
       return;
@@ -324,15 +327,15 @@ function saveResults(resultsList) {
         console.error(err);
         reject(err);
       } else  {
-        console.log("RESOLVE")
         resolve();
       }
     });
   });
 }
 
-app.get("/api/results/:queryId", (req, res) => {
+app.get("/api/results/:queryId", authMiddleware, (req, res) => {
     const queryId = req.params.queryId;
+
     const sqlQuery = `SELECT * FROM results WHERE queryId = ${queryId}`;
     connection.query(sqlQuery, function(err, results) {
         if (err) {

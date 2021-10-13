@@ -576,7 +576,6 @@
         $("#form-submit-button").on("click", () => {
           $(".alert").hide(); // Hide any shown alerts
           const formData = convertFormToJson($("#change-password-form"));
-          console.log(formData)
           const { password, confirmPassword } = formData;
           if (password.length == 0 || confirmPassword.length == 0) {
             $(".alert-danger").html("All fields are required.").show();
@@ -597,7 +596,6 @@
             type: "GET",
             url: "api/users/active",
             success: user => {
-              console.log(user);
               resolve(user);
             }
           })
@@ -705,7 +703,6 @@
         let queryId = 11;
         const listItem = $(".query-list-item");
         const $desiredListItem = listItem.first();
-        console.log($desiredListItem.data("id") == queryId)
         const index = $(".query-list-item").index(`[data-id=${queryId}]`);
 
         $queriesList.on("click", "li", event => {
@@ -852,7 +849,6 @@
         });
 
         if ($(form).hasClass("create-form")) {
-          console.log("has class")
           // Adds checkbox values to object (if not checked jQuery does not include it automatically)
           dataObject["only-new"] = "only-new" in dataObject;
           dataObject["all-dealers"] = "all-dealers" in dataObject;
