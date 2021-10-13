@@ -96,6 +96,13 @@ Three color scheme:
   font-size: 3rem;
 }
 
+#change-password-modal .modal-dialog {
+  max-width: 450px;
+}
+#change-password-modal .modal-dialog #form-submit-button {
+  width: 100%;
+}
+
 main {
   height: 100vh;
   display: flex;
@@ -104,6 +111,9 @@ main {
 main #side-panel {
   background-color: var(--primary-bg-color);
   color: var(--primary-text-color);
+}
+main #side-panel .dropdown-item {
+  font-size: 0.875rem;
 }
 main #side-panel .bi-search {
   font-size: 2.4rem;

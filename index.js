@@ -15,7 +15,7 @@ const oneDay = 1000 * 60 * 60 * 24;
 app.use(session({
   secret: "2C44-4D44-WppQ38S", // Store in env variable
   resave: true,
-  saveUninitialized: true,
+  saveUninitialized: false,
   cookie: { maxAge: oneDay }
 }));
 
@@ -76,6 +76,41 @@ app.get("/api/users/all", (req, res) => {
   connection.query(sqlQuery, (err, results) => {
     res.status(200).send({ results });
   });
+});
+
+/* Used to get logged-in user's email from session */
+app.get("/api/users/active", (req, res) => {
+  if (req.session && req.session.email) {
+    console.log("+++")
+    console.log(req.session.email);
+    res.status(200).send({ email: req.session.email });
+  }
+});
+
+app.post("/api/users/changePassword", (req, res) => {
+  const { password, confirmPassword } = req.body;
+  console.log("CHANGE PASS")
+  if (req.session && req.session.email) {
+
+    const hashedPassword = getHashedPassword(password);
+    const sqlQuery = mysql.format("UPDATE users SET password = ? WHERE email = ?",
+    [hashedPassword, req.session.email]);
+    connection.query(sqlQuery, (err, results) => {
+      if (err) {
+        console.log(err);
+        res.redirect("/?auth=err");
+      } else {
+        res.redirect("/?auth=success")
+      }
+    });
+  } else {
+    res.redirect("/login");
+  }
+})
+
+app.get("/logout", (req, res) => {
+  req.session.destroy();
+  res.redirect("/login");
 });
 
 /* Called on login form submit. Validates form data one more time. */
@@ -224,8 +259,10 @@ app.get("/api/results/refresh/:queryId", (req, res) => {
 app.post("/api/queries/submit", (req, res) => {
   // 1) Validate form data
   const isDataJson = isJson(req.body);
-  if (!isDataJson)
+  if (!isDataJson) {
+    res.status(406).send();
     return;
+  }
 
   const data = parseJson(req.body);
 

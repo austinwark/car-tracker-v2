@@ -34,7 +34,7 @@
         <div class="input-group my-3">
           <!-- <label for="register-input-confirm" class="form-label">Confirm Password</label> -->
           <span class="input-group-text"><i class="bi bi-arrow-clockwise"></i></span>
-          <input name="confirmPassword" type="password" class="form-control form-control-sm" id="register-input-confirm" value="password" />
+          <input name="confirmPassword" type="password" placeholder="Confirm Password" class="form-control form-control-sm" id="register-input-confirm" value="password" />
         </div>
           <div class="alert alert-danger text-center" role="alert">
             
@@ -42,7 +42,7 @@
           <div class="alert alert-success text-center" role="alert">
 
           </div>
-        <button type="button" class="btn btn-primary" id="form-submit-button">Submit</button>
+        <button type="button" class="btn btn-primary" id="form-submit-button"><i class="bi bi-cloud-arrow-up" id="submit-icon"></i> Submit</button>
       </form>
       <div class="registration-append-message p-3 my-3 mx-auto text-center">
         <p class="m-0">Already a user? <a href="/login">Login here</a>.</p>
@@ -79,7 +79,7 @@
               showDangerAlert("All fields are required.");
               return;
             } else if (password !== confirmPassword) {
-              showDangerAlert("Passwords do not match.");
+              showDangerAlert("Passwords must match.");
               return;
             }
 

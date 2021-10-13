@@ -31,9 +31,16 @@
             </div>
           </div>
           <div class="row">
-            <div class="col-12 text-center mt-2">
-              <p class="mb-0">@FakeUser</p>
-              <p>fakeemail@email.com</p>
+            <div class="col-12 text-center mt-2 mb-3">
+              <div class="dropdown">
+                <button id="user-email" class="btn btn-sm btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                  <!-- User's email goes here -->
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                  <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#change-password-modal">Change password</a></li>
+                  <li><a class="dropdown-item" href="/logout">Sign out</a></li>
+                </ul>
+              </div>
             </div>
             <hr />
           </div>
@@ -93,7 +100,7 @@
         </section>
 
         <!-- *** Meta Panel *** -->
-        <section id="meta-panel" class="col-3">
+        <section id="meta-panel" class="col-3 d-flex flex-column justify-content-between">
           <div class="accordion" id="meta-panel-accordion">
             <div class="accordion-item">
               <h2 class="accordion-header" id="accordion-heading-one">
@@ -230,6 +237,19 @@
               </div>
             </div>
           </div>
+          <!-- Toast message container -->
+    <div class="toast mb-3" id="toast" data-bs-delay="8000" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header fw-bold me-auto">
+        <!-- <img src="..." class="rounded me-2" alt="..."> -->
+        <strong class="toast-header-text">
+          <!-- Header shown here -->
+        </strong>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body">
+        <!-- Message shown here -->
+      </div>
+    </div>
         </section>
       </div>
     </main>
@@ -243,7 +263,7 @@
       </div>
       <div class="offcanvas-body">
         <div class="container-fluid">
-          <form id="create-form" class="row">
+          <form id="create-form" class="row create-form">
             <h5>Query Details</h5>
             <div class="col-12 my-1">
               <label for="create-input-name" class="form-label">Query Name</label>
@@ -350,11 +370,11 @@
             </h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="modal-body">
+          <div class="modal-body"><i class="bi bi-cloud-arrow-up" id="submit-icon"></i>
             Are you sure you want to delete <span></span>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
               Close
             </button>
             <button type="button" class="btn btn-primary" id="query-delete-confirmation-button">
@@ -364,7 +384,6 @@
         </div>
       </div>
     </div>
-    <!-- ==== -->
     <!-- Result Details Modal -->
     <div class="modal fade" id="result-details-modal" tabindex="-1" aria-labelledby="result-details-modal-title"
       aria-hidden="true">
@@ -397,6 +416,44 @@
         </div>
       </div>
     </div>
+    <!-- ==== -->
+    <!-- Change Password Modal -->
+    <div class="modal fade show" id="change-password-modal" tabindex="-1" aria-labelledby="change-password-modal-title"
+      aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="change-password-modal-title">Change Password</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" id="change-password-modal-body">
+            <form method="POST" action="/api/users/changePassword" class="p-1 mx-auto my-1" id="change-password-form">
+              <div class="input-group my-3">
+                <!-- <label for="change-password-input-password" class="form-label">Password</label> -->
+                <span class="input-group-text"><i class="bi bi-key"></i></span>
+                <input name="password" type="password" placeholder="Password" class="form-control form-control-sm" id="change-password-input-password" value="password" />
+              </div>
+              <div class="input-group my-3">
+                <!-- <label for="change-password-input-confirm" class="form-label">Confirm Password</label> -->
+                <span class="input-group-text"><i class="bi bi-arrow-clockwise"></i></span>
+                <input name="confirmPassword" type="password" placeholder="Confirm Password" class="form-control form-control-sm" id="change-password-input-confirm" value="password" />
+              </div>
+                <div class="alert alert-danger text-center" role="alert">
+                  
+                </div>
+                <div class="alert alert-success text-center" role="alert">
+      
+                </div>
+              <button type="button" class="btn btn-primary" id="form-submit-button"><i class="bi bi-cloud-arrow-up" id="submit-icon"></i> Submit</button>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
       crossorigin="anonymous"></script>
@@ -408,10 +465,25 @@
     <script>
       $("document").ready(() => {
 
-        refreshQueriesAndResults();
+        const searchParams = new URLSearchParams(window.location.search);
+        if (searchParams.has("auth")) {
+          const authParam = searchParams.get("auth");
+          if (authParam === "err") {
+            showToast("Error", "A problem was encountered changing your password.");
+          } else if (authParam === "success") {
+            showToast("Success!", "Password changed successfully!");
+          }
+        }
 
+        refreshQueriesAndResults();
+        
         $("#submit-loader").hide();
         $("#refresh-loader").hide();
+        $(".alert").hide();
+
+        getActiveUser().then(user => {
+          $("#user-email").html(user.email);
+        });
 
         $(".offcanvas-body").overlayScrollbars({
           resize: "vertical"
@@ -496,7 +568,38 @@
             }
           });
         });
+
+        // ====
+        $("#form-submit-button").on("click", () => {
+          $(".alert").hide(); // Hide any shown alerts
+          const formData = convertFormToJson($("#change-password-form"));
+          console.log(formData)
+          const { password, confirmPassword } = formData;
+          if (password.length == 0 || confirmPassword.length == 0) {
+            $(".alert-danger").html("All fields are required.").show();
+            return;
+          } else if (password !== confirmPassword) {
+            $(".alert-danger").html("Passwords must match.").show();
+            return;
+          }
+
+          $("#change-password-form").submit();
+        });
       });
+
+      /* Gets logged-in user from server */
+      const getActiveUser = () => {
+        return new Promise((resolve, reject) => {
+          $.ajax({
+            type: "GET",
+            url: "api/users/active",
+            success: user => {
+              console.log(user);
+              resolve(user);
+            }
+          })
+        })
+      }
 
       const displayCarouselSlides = (results, activeVin) => {
         const numberOfResults = results.length;
@@ -534,7 +637,6 @@
           return slideHtml;
         })
       }
-      // ====
       /* Fetches and displays all queries, then fetches and displays the query's results. */
       /* queryId is used to select active query in UI. Defaults to first query */
       const refreshQueriesAndResults = (activeQueryId = null) => {
@@ -700,7 +802,6 @@
             $("tbody").append(resultHtml);
           }
         }
-        // ====
         $("#results-refresh-button").prop("disabled", false);
       }
 
@@ -726,6 +827,12 @@
         $("#settings-switch-all").prop("checked", allDealerships);
       }
 
+      const showToast = (header, message) => {
+        $("#toast .toast-header-text").html(header);
+        $("#toast .toast-body").html(message);
+        $("#toast").toast("show")
+      }
+
       /* Resets form fields */
       const clearFormData = () => {
         $("#create-form").find("input[type=text], input[type=number]").val("");
@@ -741,10 +848,13 @@
           dataObject[field.name] = field.value;
         });
 
-        // Adds checkbox values to object (if not checked jQuery does not include it automatically)
-        dataObject["only-new"] = "only-new" in dataObject;
-        dataObject["all-dealers"] = "all-dealers" in dataObject;
-        dataObject["auto-updates"] = "auto-updates" in dataObject;
+        if ($(form).hasClass("create-form")) {
+          console.log("has class")
+          // Adds checkbox values to object (if not checked jQuery does not include it automatically)
+          dataObject["only-new"] = "only-new" in dataObject;
+          dataObject["all-dealers"] = "all-dealers" in dataObject;
+          dataObject["auto-updates"] = "auto-updates" in dataObject;
+        }
 
         return dataObject;
       }
