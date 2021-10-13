@@ -175,4 +175,9 @@ main #meta-panel .query-settings-card p {
   font-size: 1rem;
 }
 
+/* Registration Styles */
+.registration-container {
+  max-width: 540px;
+}
+
 /*# sourceMappingURL=styles.css.map */

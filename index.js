@@ -1,10 +1,29 @@
 const express = require("express");
+const handlebars = require("express-handlebars");
 const mysql = require("mysql");
+const crypto = require("crypto");
+const session = require("express-session");
 const Scraper = require("./utils/scraper.js");
 
 const app = express();
 app.use(express.json());
+app.use(express.urlencoded({ extended: true}));
 app.use(express.static(__dirname + "/public"));
+
+const oneDay = 1000 * 60 * 60 * 24;
+app.use(session({
+  secret: "2C44-4D44-WppQ38S", // Store in env variable
+  resave: true,
+  saveUninitialized: true,
+  cookie: { maxAge: oneDay }
+}));
+
+// Handlebars config
+app.engine('.hbs', handlebars({
+  extname: '.hbs'
+}));
+app.set('view engine', '.hbs');
+app.set("views", __dirname + "/views/");;
 
 const connection = mysql.createConnection({
     host: "localhost",
@@ -15,8 +34,81 @@ const connection = mysql.createConnection({
 
 connection.connect();
 
+const users = [
+  // This user is added to the array to avoid creating a new user on each restart
+  {
+      email: 'test@test.com',
+      // This is the SHA256 hash for value of `password`
+      password: 'XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg='
+  }
+];
+
+app.post("/login", (req, res) => {
+  const { email, password } = req.body;
+  const hashedPassword = getHashedPassword(password);
+
+  const user = users.find(u => {
+    return u.email === email && hashedPassword === u.password;
+  });
+
+  if (user) {
+    req.session.email = email;
+    res.redirect("/");
+  } else {
+    res.render("login", {
+      message: "Invalid email or password.",
+      messageClass: "alert-danger"
+    });
+  }
+});
+
+app.post("/registration", (req, res) => {
+  const { email, password, confirmPassword } = req.body;
+  
+  if (password === confirmPassword) {
+    console.log("passwords match");
+
+    if (users.find(user => user.email === email)) {
+      res.render("registration", {
+        message: "Email already in use.",
+        messageClass: "alert-danger"
+      });
+      return;
+    }
+    
+    const hashedPassword = getHashedPassword(password);
+    users.push({
+      email,
+      password: hashedPassword
+    });
+
+    res.render("login", {
+      message: "Registration complete. Please login to continue.",
+      messageClass: "alert-success"
+    });
+  } else {
+    res.render("registration", {
+      message: "Passwords do not match.",
+      messageClass: "alert-danger"
+    });
+  }
+});
+
+app.get("/registration", (req, res) => {
+  res.render("registration");
+});
+
+app.get("/login", (req, res) => {
+  res.render("login");
+})
+
 app.get("/", (req, res) => {
+  if (req.session && users.find(user => user.email === req.session.email))  {
+    console.log("SESSION GOOD")
     res.sendFile(__dirname + "/index.html");
+  } else {
+      res.render("login");
+  }
 });
 
 app.get("/api/queries/all", (req, res) => {
@@ -183,6 +275,15 @@ app.get("/api/results/:queryId", (req, res) => {
         }
     })
 })
+
+const getHashedPassword = password => {
+  const sha256 = crypto.createHash("sha256");
+  const hash = sha256.update(password).digest("base64");
+  return hash;
+}
+const generateAuthToken = () => {
+  return crypto.randomBytes(30).toString('hex');
+}
 
 function parseJson(data) {
     const dataObject = {};
