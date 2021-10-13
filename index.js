@@ -54,7 +54,7 @@ app.post("/api/users/auth", (req, res) => {
   const { email, password } = req.body;
   const hashedPassword = getHashedPassword(password);
 
-  const sqlQuery = mysql.format("SELECT * FROM USERS WHERE email = ?", [email]);
+  const sqlQuery = mysql.format("SELECT * FROM users WHERE email = ?", [email]);
   connection.query(sqlQuery, (err, results) => {
     if (err) {
       console.log(err);
