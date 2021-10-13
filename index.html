@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+  <head>
+    <title>Tracker Appr</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&family=Oxygen:wght@400;700&display=swap"
+      rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css"
+      integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" />
+    <link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/overlayscrollbars/1.13.1/css/OverlayScrollbars.css"
+      integrity="sha512-Ho1L8FTfzcVPAlvfkL1BV/Lmy1JDUVAP82/LkhmKbRX5PnQ7CNDHAUp2GZe7ybBpovS+ssJDf+SlBOswrpFr8g=="
+      crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="/styles.css" type="text/css" />
+  </head>
+
+  <body>
+    <main class="container-fluid">
+      <div class="row m-0 p-0 w-100">
+        <!-- *** Side Panel *** -->
+        <section id="side-panel" class="col-3">
+          <div class="row">
+            <div class="col-12 text-center mt-2">
+              <h1><i class="bi bi-search"></i></h1>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12 text-center mt-2 mb-3">
+              <div class="dropdown">
+                <button id="user-email" class="btn btn-sm btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                  <!-- User's email goes here -->
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                  <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#change-password-modal">Change password</a></li>
+                  <li><a class="dropdown-item" href="/logout">Sign out</a></li>
+                </ul>
+              </div>
+            </div>
+            <hr />
+          </div>
+          <div class="row">
+            <div class="
+                  col-12
+                  d-flex
+                  flex-column
+                  justify-content-center
+                  text-center
+                ">
+              <h2 class="text-center">
+                <i class="bi bi-arrow-left-right"></i> Queries
+              </h2>
+              <ul class="queries-list p-0 d-inline-block"></ul>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12 text-center">
+              <button id="create-offcanvas-button" type="button" class="btn btn-primary" data-bs-toggle="offcanvas"
+                data-bs-target="#create-offcanvas">
+                <i class="bi bi-pencil-square" id="create-icon"></i> Create
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- *** Results Panel *** -->
+        <section id="results-panel" class="col-6">
+          <div class="d-flex justify-content-between align-items-center">
+            <h2 class="py-2">Query Results</h2>
+            <button type="button" class="btn btn-sm btn-primary" id="results-refresh-button">
+              <span id="refresh-loader">
+                <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                <span class="visually-hidden">Loading...</span>
+              </span>
+              <i class="bi bi-arrow-repeat" id="refresh-icon"></i> Refresh</button>
+          </div>
+          <table class="table table-sm table-hover w-100" id="results-table">
+            <thead>
+              <tr>
+                <th scope="col">Stock #</th>
+                <th scope="col">Year</th>
+                <th scope="col">Make</th>
+                <th scope="col">Model</th>
+                <th scope="col">Trim</th>
+                <th scope="col">Price</th>
+                <th scope="col">Ext. Color</th>
+                <th scope="col">Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Results -->
+            </tbody>
+          </table>
+          <h5 id="no-results-msg">No results...</h5>
+        </section>
+
+        <!-- *** Meta Panel *** -->
+        <section id="meta-panel" class="col-3 d-flex flex-column justify-content-between">
+          <div class="accordion" id="meta-panel-accordion">
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="accordion-heading-one">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
+                  aria-expanded="true" aria-controls="collapseOne">
+                  <h6 class="m-0">
+                    Query Details
+                  </h6>
+                </button>
+              </h2>
+              <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="accordion-heading-one"
+                data-bs-parent="#meta-panel-accordion">
+                <div class="accordion-body">
+                  <ul class="list-group query-details-list">
+                    <li class="list-group-item d-flex justify-content-between">
+                      <span>Query Name</span><span id="query-details-name"></span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                      <span>Model</span><span id="query-details-model"></span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                      <span>Price Range</span><span id="query-details-price"></span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                      <span>Year Range</span><span id="query-details-year"></span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                      <span>Results</span><span id="query-details-results"></span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                      <span>Created</span><span id="query-details-created"></span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="accordion-heading-two">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                  <h6 class="m-0">
+                    Customer Details
+                  </h6>
+                </button>
+              </h2>
+              <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="accordion-heading-two"
+                data-bs-parent="#meta-panel-accordion">
+                <div class="accordion-body">
+                  <div class="card customer-details-card">
+                    <div class="card-header">
+                      <h5 class="card-title mb-0" id="customer-details-name"></h5>
+                    </div>
+                    <div class="card-body">
+                      <h6 class="card-subtitle text-muted" id="customer-details-phone"></h6>
+                      <p class="card-text" id="customer-details-notes"></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="accordion-heading-three">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                  <h6 class="m-0">
+                    Query Settings
+                  </h6>
+                </button>
+              </h2>
+              <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="accordion-heading-three"
+                data-bs-parent="#meta-panel-accordion">
+                <div class="accordion-body">
+                  <div class="card query-settings-card">
+                    <div class="card-body">
+                      <div class="row my-1">
+                        <div class="col-9">
+                          <p id="settings-auto-label">
+                            Automatic Email Updates
+                          </p>
+                          <!-- <p>Receive daily email updates with results</p> -->
+                        </div>
+                        <div class="col-3">
+                          <div class="form-check form-switch float-end">
+                            <input name="settings-switch-auto" class="form-check-input" type="checkbox"
+                              id="settings-switch-auto" aria-labelledby="settings-auto-label" disabled />
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row my-1">
+                        <div class="col-9">
+                          <p id="settings-new-label">Send Only New Results</p>
+                          <!-- <p>Send unseen results only in email updates</p> -->
+                        </div>
+                        <div class="col-3">
+                          <div class="form-check form-switch float-end">
+                            <input name="settings-switch-new" class="form-check-input" type="checkbox"
+                              id="settings-switch-new" aria-labelledby="settings-new-label" disabled />
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row my-1">
+                        <div class="col-9">
+                          <p id="settings-all-label">
+                            Search all dealerships
+                          </p>
+                          <!-- <p>Check inventory of all Lia dealerships, or just Lia Toyota of Colonie</p> -->
+                        </div>
+                        <div class="col-3">
+                          <div class="form-check form-switch float-end">
+                            <input name="settings-switch-all" class="form-check-input" type="checkbox"
+                              id="settings-switch-all" aria-labelledby="settings-all-label" disabled />
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- <div class="row my-1">
+                        <div class="col-12">
+                          <button type="button" class="btn btn-secondary mb-2">
+                            <i class="bi bi-envelope"></i> Send to email
+                          </button>
+                        </div>
+                      </div> -->
+                      <div class="row mt-1">
+                        <div class="col-12">
+                          <button type="button" class="btn btn-danger" id="settings-delete-button" data-bs-toggle="modal"
+                            data-bs-target="#delete-confirmation-modal">
+                            <i class="bi bi-trash"></i> Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Toast message container -->
+    <div class="toast mb-3" id="toast" data-bs-delay="8000" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header fw-bold me-auto">
+        <!-- <img src="..." class="rounded me-2" alt="..."> -->
+        <strong class="toast-header-text">
+          <!-- Header shown here -->
+        </strong>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body">
+        <!-- Message shown here -->
+      </div>
+    </div>
+        </section>
+      </div>
+    </main>
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="create-offcanvas" data-bs-backdrop="false"
+      aria-labelledby="create-offcanvas-header">
+      <div class="offcanvas-header pt-3 ps-3 pb-0">
+        <h4 class="offcanvas-title" id="create-offcanvas-header">
+          Create a Query
+        </h4>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <div class="container-fluid">
+          <form id="create-form" class="row create-form">
+            <h5>Query Details</h5>
+            <div class="col-12 my-1">
+              <label for="create-input-name" class="form-label">Query Name</label>
+              <input name="query-name" type="text" class="form-control form-control-sm" id="create-input-name"
+                placeholder="Tacoma for Bob" required value="Testing " />
+            </div>
+            <div class="col-12 my-1">
+              <div class="form-check form-switch">
+                <input name="auto-updates" class="form-check-input" type="checkbox" id="create-switch-auto"
+                  value="true" />
+                <label class="form-check-label" for="create-switch-auto">Automatic email updates</label>
+              </div>
+            </div>
+            <div class="col-12 my-1">
+              <div class="form-check form-switch">
+                <input name="only-new" class="form-check-input" type="checkbox" id="create-switch-new" value="true" />
+                <label class="form-check-label" for="create-switch-new">Send only new results</label>
+              </div>
+            </div>
+            <div class="col-12 my-1">
+              <div class="form-check form-switch">
+                <input name="all-dealers" class="form-check-input" type="checkbox" id="create-switch-dealers"
+                  value="true" />
+                <label class="form-check-label" for="create-switch-dealers">Search all dealerships</label>
+              </div>
+            </div>
+            <hr class="my-2" />
+            <h5>Vehicle Details</h5>
+            <div class="col-12 my-1">
+              <label for="create-select-model" class="form-label">Model</label>
+              <select name="model" id="create-select-model" class="form-select form-select-sm" required>
+                <option value="Avalon">Avalon</option>
+                <option value="Camry">Camry</option>
+                <option value="Corolla">Corolla</option>
+                <option value="Prius">Prius</option>
+                <option value="Sienna">Sienna</option>
+                <option value="4Runner">4Runner</option>
+                <option value="Highlander">Highlander</option>
+                <option value="RAV4">RAV4</option>
+                <option value="RAV4 Prime">RAV4 Prime</option>
+                <option value="Tacoma">Tacoma</option>
+                <option value="Tundra">Tundra</option>
+              </select>
+            </div>
+            <div class="col-6 my-1">
+              <label for="create-input-min-price" class="form-label">Min Price</label>
+              <input name="min-price" class="form-control form-control-sm" id="create-input-min-price" type="number"
+                step="100" min="0" max="100000" required value="10000" />
+            </div>
+            <div class="col-6 my-1">
+              <label for="create-input-max-price" class="form-label">Max Price</label>
+              <input name="max-price" class="form-control form-control-sm" id="create-input-max-price" type="number"
+                step="100" min="0" max="100000" required value="30000" />
+            </div>
+            <div class="col-6 my-1">
+              <label for="create-input-min-year" class="form-label">Min Year</label>
+              <input name="min-year" class="form-control form-control-sm" id="create-input-min-year" type="number"
+                step="1" min="2000" max="2022" required value="2010" />
+            </div>
+            <div class="col-6 my-1">
+              <label for="create-input-max-year" class="form-label">Max Year</label>
+              <input name="max-year" class="form-control form-control-sm" id="create-input-max-year" type="number"
+                step="1" min="2000" max="2022" required value="2020" />
+            </div>
+            <hr class="my-2" />
+            <h5>Customer Details</h5>
+            <div class="col-12 my-1">
+              <label for="create-input-customer-name" class="form-label">Customer Name</label>
+              <input name="customer-name" class="form-control form-control-sm" id="create-input-customer-name" type="text"
+                value="Austin Ward" />
+            </div>
+            <div class="col-12 my-1">
+              <label for="create-input-customer-phone" class="form-label">Customer Phone #</label>
+              <input name="customer-phone" class="form-control form-control-sm" id="create-input-customer-phone"
+                type="text" value="(518) 555-5555" />
+            </div>
+            <div class="col-12 my-1">
+              <label for="create-input-customer-notes" class="form-label">Notes</label>
+              <input name="notes" class="form-control form-control-sm" id="create-input-customer-notes" type="text"
+                value="Austin needs this ASAP!" />
+            </div>
+            <div class="col-12 my-1 text-center">
+              <button type="submit" class="btn btn-primary">
+                <span id="submit-loader">
+                  <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                  <span class="visually-hidden">Loading...</span>
+                </span>
+                <i class="bi bi-cloud-arrow-up" id="submit-icon"></i> Submit
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Query Confirm Modal -->
+    <div class="modal fade" id="delete-confirmation-modal" tabindex="-1" aria-labelledby="delete-confirmation-modal-title"
+      aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="delete-confirmation-modal-title">
+              Caution!
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body"><i class="bi bi-cloud-arrow-up" id="submit-icon"></i>
+            Are you sure you want to delete <span></span>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+              Close
+            </button>
+            <button type="button" class="btn btn-primary" id="query-delete-confirmation-button">
+              Delete Query
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Result Details Modal -->
+    <div class="modal fade" id="result-details-modal" tabindex="-1" aria-labelledby="result-details-modal-title"
+      aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="result-details-modal-title">Vehicle Details</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" id="result-details-modal-body">
+            <div id="result-details-carousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="false">
+              <div class="carousel-inner">
+
+              </div>
+              <button class="carousel-control-prev" type="button" data-bs-target="#result-details-carousel"
+                data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"><i class="bi bi-caret-left-fill"></i></span>
+                <span class="visually-hidden">Previous</span>
+              </button>
+              <button class="carousel-control-next" type="button" data-bs-target="#result-details-carousel"
+                data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"><i class="bi bi-caret-right-fill"></i></span>
+                <span class="visually-hidden">Next</span>
+              </button>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ==== -->
+    <!-- Change Password Modal -->
+    <div class="modal fade show" id="change-password-modal" tabindex="-1" aria-labelledby="change-password-modal-title"
+      aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="change-password-modal-title">Change Password</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" id="change-password-modal-body">
+            <form method="POST" action="/api/users/changePassword" class="p-1 mx-auto my-1" id="change-password-form">
+              <div class="input-group my-3">
+                <!-- <label for="change-password-input-password" class="form-label">Password</label> -->
+                <span class="input-group-text"><i class="bi bi-key"></i></span>
+                <input name="password" type="password" placeholder="Password" class="form-control form-control-sm" id="change-password-input-password" value="password" />
+              </div>
+              <div class="input-group my-3">
+                <!-- <label for="change-password-input-confirm" class="form-label">Confirm Password</label> -->
+                <span class="input-group-text"><i class="bi bi-arrow-clockwise"></i></span>
+                <input name="confirmPassword" type="password" placeholder="Confirm Password" class="form-control form-control-sm" id="change-password-input-confirm" value="password" />
+              </div>
+                <div class="alert alert-danger text-center" role="alert">
+                  
+                </div>
+                <div class="alert alert-success text-center" role="alert">
+      
+                </div>
+              <button type="button" class="btn btn-primary" id="form-submit-button"><i class="bi bi-cloud-arrow-up" id="submit-icon"></i> Submit</button>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+      crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
+      crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/overlayscrollbars/1.13.1/js/jquery.overlayScrollbars.js"
+      integrity="sha512-v6YPVQdeRVcdt+KmeSBDWcsxqLP6rlTVC2mxuBHrGUv05Q/hES67JwEfYNDSqPHLZmfTYbbIYVZbXElzgI+RkQ=="
+      crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+      $("document").ready(() => {
+
+        const searchParams = new URLSearchParams(window.location.search);
+        if (searchParams.has("auth")) {
+          const authParam = searchParams.get("auth");
+          if (authParam === "err") {
+            showToast("Error", "A problem was encountered changing your password.");
+          } else if (authParam === "success") {
+            showToast("Success!", "Password changed successfully!");
+          }
+        }
+
+        refreshQueriesAndResults();
+        
+        $("#submit-loader").hide();
+        $("#refresh-loader").hide();
+        $(".alert").hide();
+
+        getActiveUser().then(user => {
+          $("#user-email").html(user.email);
+        });
+
+        $(".offcanvas-body").overlayScrollbars({
+          resize: "vertical"
+        });
+
+        // Focuses first input in form
+        $("#create-offcanvas-button").on("click", () => {
+          $("input[name=query-name]").focus();
+        });
+
+        // Fetches and displays query name in delete confirmation modal
+        $("#settings-delete-button").on("click", () => {
+          const selectedQueryId = $(".queries-list").find("li.query-selected").data("id");
+
+          getSingleQuery(selectedQueryId).then(query => {
+            const $modalBodyText = $("#delete-confirmation-modal .modal-body span");
+            $modalBodyText.text("").append(` #${query.name}?`);
+          });
+        });
+
+        $("#query-delete-confirmation-button").on("click", () => {
+          const selectedQueryId = $(".queries-list").find("li.query-selected").data("id");
+
+          deleteSingleQuery(selectedQueryId).then(() => {
+            $("#delete-confirmation-modal").modal("hide")
+            // $("body").removeClass("modal-open").removeProp("style");
+            showToast("Success!", "Query deleted successfully!");
+            refreshQueriesAndResults();
+          });
+        });
+
+        $("#create-form").submit(event => {
+          $("#submit-icon").hide();
+          $("#submit-loader").show();
+
+          const formData = convertFormToJson($("#create-form"));
+          $.ajax({
+            type: "POST",
+            url: "api/queries/submit",
+            data: JSON.stringify(formData),
+            contentType: "application/json;charset=UTF-8",
+            success: function (data) {
+              let { queryId } = data;
+              clearFormData();
+              $("#submit-icon").show();
+              $("#submit-loader").hide();
+              refreshQueriesAndResults(queryId);
+              $(".offcanvas").removeClass("show");
+              showToast("Success!", "Query created successfully!");
+            },
+            error: function (request, status, error) {
+              console.error(error);
+            }
+          });
+
+          event.preventDefault();
+        });
+
+        $("#results-refresh-button").on("click", () => {
+          const activeQueryId = $(".query-list-item.query-selected").data("id");
+          $("#refresh-icon").hide();
+          $("#refresh-loader").show();
+          $.ajax({
+            type: "GET",
+            url: `api/results/refresh/${activeQueryId}`,
+            success: response => {
+              $("#refresh-icon").show();
+              $("#refresh-loader").hide();
+              showToast("Success!", "Results refreshed successfully!");
+              refreshQueriesAndResults(activeQueryId);
+            }
+          });
+        });
+
+        $("#result-details-modal").on("show.bs.modal", event => {
+          const $button = $(event.relatedTarget);
+          const queryId = $button.data("query-id");
+          const activeVin = $button.data("vin");
+          const $carouselInner = $("#result-details-carousel .carousel-inner");
+          $carouselInner.children().remove(); // clear modal
+          getQueryResults(queryId).then(results => {
+            const slideArray = displayCarouselSlides(results.results, activeVin);
+            for (let i = 0; i < slideArray.length; i++) {
+              $carouselInner.append(slideArray[i]);
+            }
+          });
+        });
+
+        // ====
+        $("#form-submit-button").on("click", () => {
+          $(".alert").hide(); // Hide any shown alerts
+          const formData = convertFormToJson($("#change-password-form"));
+          const { password, confirmPassword } = formData;
+          if (password.length == 0 || confirmPassword.length == 0) {
+            $(".alert-danger").html("All fields are required.").show();
+            return;
+          } else if (password !== confirmPassword) {
+            $(".alert-danger").html("Passwords must match.").show();
+            return;
+          }
+
+          $("#change-password-form").submit();
+        });
+      });
+
+      /* Gets logged-in user from server */
+      const getActiveUser = () => {
+        return new Promise((resolve, reject) => {
+          $.ajax({
+            type: "GET",
+            url: "api/users/active",
+            success: user => {
+              resolve(user);
+            }
+          })
+        })
+      }
+
+      const displayCarouselSlides = (results, activeVin) => {
+        const numberOfResults = results.length;
+        return results.map((result, i) => {
+
+          const slideHtml = `
+            <div class="carousel-item ${result.vin == activeVin && "active"}">
+              <div class="w-75 m-auto d-flex justify-content-center">
+                <span id="carousel-item-counter"><strong>${i + 1}/${numberOfResults}</strong></span>
+                <div class="d-flex flex-column justify-content-between m-2">
+                  <div>
+                    <img src=${result.imageLink} id="result-details-image" />
+                  </div>
+                  <div class="d-flex flex-column">
+                    <a class="btn btn-secondary btn-sm my-1" role="button" href=${result.link} target="_blank">See More</a>
+                    <a class="btn btn-secondary btn-sm my-1" role="button" href=${result.carfaxLink} target="_blank">CarFax</a>
+                  </div>
+                </div>
+                <div class="d-flex flex-column m-2">
+                  <span id="result-details-title"><strong>${result.year} ${result.make} ${result.model} ${result.trim}</strong></span>
+                  <span><strong>Lia Price:</strong> ${result.price}</span>
+                  <span><strong>Engine:</strong> ${result.engine}</span>
+                  <span><strong>Transmission:</strong> ${result.transmission}</span>
+                  <span><strong>Ext. Color:</strong> ${result.extColor}</span>
+                  <span><strong>Int. Color:</strong> ${result.intColor}</span>
+                  <span><strong>Mileage:</strong> ${result.miles}</span>
+                  <span><strong>Vin #:</strong> ${result.vin}</span>
+                  <span><strong>Stock #:</strong> ${result.stock}</span>
+                  <span><strong>Dealership:</strong> ${result.dealer}</span>
+                </div>
+                
+              </div>
+            </div>
+          `;
+          return slideHtml;
+        })
+      }
+      /* Fetches and displays all queries, then fetches and displays the query's results. */
+      /* queryId is used to select active query in UI. Defaults to first query */
+      const refreshQueriesAndResults = (activeQueryId = null) => {
+        $.ajax({
+          type: "GET",
+          url: "api/queries/all", // Fetch all queries
+          error: (request, status, error) => {
+            console.error(error);
+          },
+          success: response01 => {
+            const { results } = response01;
+
+            if (results.length >= 1) {
+              displayQueriesList(results); // Display queries in list
+              if (activeQueryId == null) {
+                setActiveQuery(results[0].queryId);
+              } else {
+                setActiveQuery(activeQueryId);
+              }
+            } else {
+              clearQueriesAndResultsLists();
+              $("#results-refresh-button").prop("disabled", true);
+            }
+          }
+        });
+      }
+
+      /* Clears queries and results, and shows no results message */
+      const clearQueriesAndResultsLists = () => {
+        $(".query-list-item").remove();
+        $(".results-row").remove();
+        $("#no-results-msg").show();
+      }
+
+      const displayQueriesList = queries => {
+        const $queriesList = $(".queries-list");
+        $queriesList.children().remove(); // Resets queries list
+        let firstQueryId;
+        if (queries.length >= 1) {
+          for (let i = 0; i < queries.length; i++) {
+            const data = queries[i];
+            const queryListItemHtml =
+              `<li class="query-list-item mx-3 my-2" data-id=${data.queryId}>
+                <div class="card">
+                  <div class="card-body p-2 d-flex align-items-center justify-content-between">
+                    <div class="d-flex flex-column text-start">
+                      <p class="m-0 p-0" id="query-item-name">${data.name.trim()}</p>
+                      <p class="m-0 p-0 text-muted" id="query-item-model">${data.model.trim()}</p>
+                    </div>
+                    <div>
+                      <span class="badge badge-secondary" id="query-item-number">${data.numberOfResults}</span>
+                    </div>
+                  </div>
+                </div>
+              </li>`;
+            $queriesList.append(queryListItemHtml);
+          }
+          firstQueryId = queries[0].queryId;
+        } else {
+
+        }
+
+        let queryId = 11;
+        const listItem = $(".query-list-item");
+        const $desiredListItem = listItem.first();
+        const index = $(".query-list-item").index(`[data-id=${queryId}]`);
+
+        $queriesList.on("click", "li", event => {
+          const queryId = $(event.currentTarget).data("id");
+          setActiveQuery(queryId);
+        });
+      }
+
+      /* Calls ajax GET method to fetch list of queries. Returns a Promise */
+      const getQueriesList = () => {
+        return $.ajax({
+          type: "GET",
+          url: "api/queries/all",
+          error: function (request, status, error) {
+            console.error(error);
+          }
+        })
+      }
+
+      const getSingleQuery = queryId => {
+        return $.ajax({
+          type: "GET",
+          url: `api/queries/${queryId}`,
+          error: function (request, status, error) {
+            console.error(error);
+          }
+        });
+      }
+
+      const deleteSingleQuery = queryId => {
+        return $.ajax({
+          type: "DELETE",
+          url: `api/queries/delete/${queryId}`,
+          error: function (request, status, error) {
+            console.error(error);
+          }
+        });
+      }
+
+      /* Handles when a query is selected. Fetches and displays the query's results */
+      const setActiveQuery = queryId => {
+
+        // Fetch query THEN show query results and metadata
+        getSingleQuery(queryId).then(query => {
+          getQueryResults(queryId).then(displayQueryResults);
+          displayMetaData(query);
+        });
+
+        // Highlight selected query in list
+        $(".queries-list").children().removeClass("query-selected")
+        $(`[data-id=${queryId}]`).addClass("query-selected");
+      }
+
+      /* Takes a query id and calls ajax GET method to fetch the query's results. Returns a Promise */
+      const getQueryResults = queryId => {
+        return $.ajax({
+          type: "GET",
+          url: `api/results/${queryId}`,
+          error: function (error) {
+            console.error(error);
+          }
+        })
+      }
+
+      /* Takes a list of results and displays each result as a row in HTML table */
+      const displayQueryResults = queryResults => {
+        const { results, queryId } = queryResults;
+        if (results === null || results.length < 1) {
+
+          // Clear all results and show no results message
+          $(".results-row").remove();
+          $("#no-results-msg").show();
+        } else {
+
+          // Clear all results and hide no results messageg
+          $(".results-row").remove();
+          $("#no-results-msg").hide();
+
+          // Loop through results and display each row to HTML page
+          for (let i = 0; i < results.length; i++) {
+            const result = results[i];
+            const resultHtml =
+              `<tr class="results-row">
+                                      <td>${result.stock}</td>
+                                      <td>${result.year}</td>
+                                      <td>${result.make}</td>
+                                      <td>${result.model}</td>
+                                      <td>${result.trim}</td>
+                                      <td>${result.price}</td>
+                                      <td>${result.extColor}</td>
+                                      <td>
+                                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#result-details-modal" data-query-id="${result.queryId}" data-vin="${result.vin}">
+                                          <i class="bi bi-eye"></i>
+                                        </button>
+                                      </td>
+                                  </tr>`;
+            $("tbody").append(resultHtml);
+          }
+        }
+        $("#results-refresh-button").prop("disabled", false);
+      }
+
+
+
+      const displayMetaData = (query) => {
+        const { queryId, numberOfResults, name, model, minPrice,
+          maxPrice, minYear, maxYear, customerName, customerPhone,
+          notes, autoUpdates, onlyNew, allDealerships, createdDateFormatted } = query;
+
+        $("#query-details-name").text(name);
+        $("#query-details-model").text(model);
+        $("#query-details-price").text(`${minPrice} - ${maxPrice}`);
+        $("#query-details-year").text(`${minYear} - ${maxYear}`);
+        $("#query-details-results").text(numberOfResults || "0");
+        $("#query-details-created").text(createdDateFormatted);
+        $("#customer-details-name").html(`${customerName} <i class="bi bi-person-square float-end">`)
+        $("#customer-details-phone").text(customerPhone);
+        $("#customer-details-notes").text(`"${notes}"`);
+
+        $("#settings-switch-auto").prop("checked", autoUpdates);
+        $("#settings-switch-new").prop("checked", onlyNew);
+        $("#settings-switch-all").prop("checked", allDealerships);
+      }
+
+      const showToast = (header, message) => {
+        $("#toast .toast-header-text").html(header);
+        $("#toast .toast-body").html(message);
+        $("#toast").toast("show")
+      }
+
+      /* Resets form fields */
+      const clearFormData = () => {
+        $("#create-form").find("input[type=text], input[type=number]").val("");
+        $("#create-form").find("input[type=checkbox]").prop("checked", false);
+        $("#create-form").find("select")[0].selectedIndex = 0;
+      }
+
+      const convertFormToJson = form => {
+        const dataArray = $(form).serializeArray();
+        const dataObject = {};
+
+        $(dataArray).each((i, field) => {
+          dataObject[field.name] = field.value;
+        });
+
+        if ($(form).hasClass("create-form")) {
+          // Adds checkbox values to object (if not checked jQuery does not include it automatically)
+          dataObject["only-new"] = "only-new" in dataObject;
+          dataObject["all-dealers"] = "all-dealers" in dataObject;
+          dataObject["auto-updates"] = "auto-updates" in dataObject;
+        }
+
+        return dataObject;
+      }
+    </script>
+  </body>
+
+</html>
