@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const mysql = require("mysql");
 const cookieParser = require("cookie-parser");
@@ -13,17 +14,17 @@ app.use(express.static(__dirname + "/public"));
 
 const oneDay = 1000 * 60 * 60 * 24;
 app.use(session({
-  secret: "2C44-4D44-WppQ38S", // Store in env variable
+  secret: process.env.SESSION_SECRET,
   resave: true,
   saveUninitialized: false,
   cookie: { maxAge: oneDay }
 }));
 
 const connection = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "password",
-    database: "dev_db"
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_DATABASE
 });
 
 connection.connect();
@@ -356,9 +357,6 @@ const getHashedPassword = password => {
   const hash = sha256.update(password).digest("base64");
   return hash;
 }
-const generateAuthToken = () => {
-  return crypto.randomBytes(30).toString('hex');
-}
 
 function parseJson(data) {
     const dataObject = {};
@@ -396,4 +394,5 @@ function isJson(item) {
     return false;
  }
 
-app.listen(3000, () => console.log("Express server started at port 3000."));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log("Express server started at port 3000."));
