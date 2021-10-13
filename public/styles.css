@@ -176,8 +176,65 @@ main #meta-panel .query-settings-card p {
 }
 
 /* Registration Styles */
-.registration-container {
-  max-width: 540px;
+body {
+  background-color: var(--secondary-bg-color);
+}
+body .registration-container {
+  max-width: 450px;
+  color: var(--secondary-text-color);
+}
+body .registration-container #registration-form {
+  max-width: 90%;
+  background-color: var(--alice-blue);
+  border-radius: 0.2rem;
+}
+body .registration-container #registration-form .alert {
+  font-size: 0.8rem;
+  padding: 0.5rem;
+}
+body .registration-container #registration-form button {
+  width: 100%;
+}
+body .registration-container .registration-append-message {
+  max-width: 90%;
+  background-color: var(--alice-blue);
+  border-radius: 0.2rem;
+  font-size: 0.8rem;
+}
+body .registration-container .registration-append-message a {
+  text-decoration: none;
+  color: var(--blue-ncs);
+}
+
+/* Login Styles */
+body {
+  background-color: var(--secondary-bg-color);
+}
+body .login-container {
+  max-width: 450px;
+  color: var(--secondary-text-color);
+}
+body .login-container #login-form {
+  max-width: 90%;
+  background-color: var(--alice-blue);
+  border-radius: 0.2rem;
+}
+body .login-container #login-form .alert {
+  font-size: 0.8rem;
+  padding: 0.5rem;
+}
+body .login-container #login-form button {
+  width: 100%;
+}
+body .login-container .login-append-message {
+  max-width: 90%;
+  background-color: var(--alice-blue);
+  border-radius: 0.2rem;
+  font-size: 0.8rem;
+}
+body .login-container .login-append-message a {
+  text-decoration: none;
+  color: var(--blue-ncs);
 }
 
 /*# sourceMappingURL=styles.css.map */

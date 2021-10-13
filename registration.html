@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Tracker Appr</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&family=Oxygen:wght@400;700&display=swap"
+      rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css"
+      integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" />
+    <link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/overlayscrollbars/1.13.1/css/OverlayScrollbars.css"
+      integrity="sha512-Ho1L8FTfzcVPAlvfkL1BV/Lmy1JDUVAP82/LkhmKbRX5PnQ7CNDHAUp2GZe7ybBpovS+ssJDf+SlBOswrpFr8g=="
+      crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="/styles.css" type="text/css" />
+  </head>
+  <body>
+    <div class="container registration-container mt-5 p-3">
+      <h1 class="registration-header text-center">Create an Account</h1>
+      <form method="POST" action="/registration" class="p-3 mx-auto my-3" id="registration-form">
+        <div class="input-group my-3">
+          <!-- <label for="register-input-email" class="form-label">Email</label> -->
+          <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+          <input name="email" type="email" placeholder="Email Address" class="form-control form-control-sm" id="register-input-email" value="test@test.com" />
+        </div>
+        <div class="input-group my-3">
+          <!-- <label for="register-input-password" class="form-label">Password</label> -->
+          <span class="input-group-text"><i class="bi bi-key"></i></span>
+          <input name="password" type="password" placeholder="Password" class="form-control form-control-sm" id="register-input-password" value="password" />
+        </div>
+        <div class="input-group my-3">
+          <!-- <label for="register-input-confirm" class="form-label">Confirm Password</label> -->
+          <span class="input-group-text"><i class="bi bi-arrow-clockwise"></i></span>
+          <input name="confirmPassword" type="password" class="form-control form-control-sm" id="register-input-confirm" value="password" />
+        </div>
+          <div class="alert alert-danger text-center" role="alert">
+            
+          </div>
+          <div class="alert alert-success text-center" role="alert">
+
+          </div>
+        <button type="button" class="btn btn-primary" id="form-submit-button">Submit</button>
+      </form>
+      <div class="registration-append-message p-3 my-3 mx-auto text-center">
+        <p class="m-0">Already a user? <a href="/login">Login here</a>.</p>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+      crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
+      crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/overlayscrollbars/1.13.1/js/jquery.overlayScrollbars.js"
+      integrity="sha512-v6YPVQdeRVcdt+KmeSBDWcsxqLP6rlTVC2mxuBHrGUv05Q/hES67JwEfYNDSqPHLZmfTYbbIYVZbXElzgI+RkQ=="
+      crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+      <script>
+        $("document").ready(() => {
+
+          hideAlerts();
+
+          const searchParams = new URLSearchParams(window.location.search);
+          if (searchParams.has("err")) {
+            const msg = searchParams.get("err");
+            if (msg === "401") {
+              showDangerAlert("Email already in use.");
+            } else if (msg === "406") {
+              showDangerAlert("Server error. Please try again later.");
+            }
+          }
+
+          $("#form-submit-button").on("click", event => {
+            const formData = convertFormToJson($("#registration-form"));
+            const { email, password, confirmPassword } = formData;
+
+            if (email.length == 0 || password.length == 0 || confirmPassword.length == 0) {
+              showDangerAlert("All fields are required.");
+              return;
+            } else if (password !== confirmPassword) {
+              showDangerAlert("Passwords do not match.");
+              return;
+            }
+
+            getAllUsers().then(users => {
+              console.log(users);
+              if (users.find(user => user.email === email)) {
+                showDangerAlert("Email already in use.");
+              } else {
+                hideAlerts();
+                $("#registration-form").submit();
+              }
+            }); 
+          });
+          
+        });
+
+        const getAllUsers = () => {
+
+          return new Promise((resolve, reject) => {
+            $.ajax({
+              type: "GET",
+              url: "api/users/all",
+              success: response => {
+                const { results } = response;
+                resolve(results);
+              }
+            }) // TODO: reject
+          })
+        }
+
+        const hideAlerts = () => {
+          $(".alert").html("").hide();
+        }
+
+        const showSuccessAlert = message => {
+          hideAlerts();
+          $(".alert-success").html(message).show();
+        }
+
+        const showDangerAlert = message => {
+          hideAlerts();
+          $(".alert-danger").html(message).show();
+        }
+
+        const convertFormToJson = form => {
+          const dataArray = $(form).serializeArray();
+          const dataObject = {};
+
+          $(dataArray).each((i, field) => {
+            dataObject[field.name] = field.value;
+          });
+
+          return dataObject;
+        }
+      </script>
+  </body>
+</html>
