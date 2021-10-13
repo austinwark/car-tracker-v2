@@ -96,6 +96,13 @@ Three color scheme:
   font-size: 3rem;
 }
 
+#change-password-modal .modal-dialog {
+  max-width: 450px;
+}
+#change-password-modal .modal-dialog #form-submit-button {
+  width: 100%;
+}
+
 main {
   height: 100vh;
   display: flex;
@@ -104,6 +111,9 @@ main {
 main #side-panel {
   background-color: var(--primary-bg-color);
   color: var(--primary-text-color);
+}
+main #side-panel .dropdown-item {
+  font-size: 0.875rem;
 }
 main #side-panel .bi-search {
   font-size: 2.4rem;
@@ -173,6 +183,68 @@ main #meta-panel .customer-details-card p {
 }
 main #meta-panel .query-settings-card p {
   font-size: 1rem;
+}
+
+/* Registration Styles */
+body {
+  background-color: var(--secondary-bg-color);
+}
+body .registration-container {
+  max-width: 450px;
+  color: var(--secondary-text-color);
+}
+body .registration-container #registration-form {
+  max-width: 90%;
+  background-color: var(--alice-blue);
+  border-radius: 0.2rem;
+}
+body .registration-container #registration-form .alert {
+  font-size: 0.8rem;
+  padding: 0.5rem;
+}
+body .registration-container #registration-form button {
+  width: 100%;
+}
+body .registration-container .registration-append-message {
+  max-width: 90%;
+  background-color: var(--alice-blue);
+  border-radius: 0.2rem;
+  font-size: 0.8rem;
+}
+body .registration-container .registration-append-message a {
+  text-decoration: none;
+  color: var(--blue-ncs);
+}
+
+/* Login Styles */
+body {
+  background-color: var(--secondary-bg-color);
+}
+body .login-container {
+  max-width: 450px;
+  color: var(--secondary-text-color);
+}
+body .login-container #login-form {
+  max-width: 90%;
+  background-color: var(--alice-blue);
+  border-radius: 0.2rem;
+}
+body .login-container #login-form .alert {
+  font-size: 0.8rem;
+  padding: 0.5rem;
+}
+body .login-container #login-form button {
+  width: 100%;
+}
+body .login-container .login-append-message {
+  max-width: 90%;
+  background-color: var(--alice-blue);
+  border-radius: 0.2rem;
+  font-size: 0.8rem;
+}
+body .login-container .login-append-message a {
+  text-decoration: none;
+  color: var(--blue-ncs);
 }
 
 /*# sourceMappingURL=styles.css.map */

@@ -1,6 +1,6 @@
 const express = require("express");
+const handlebars = require("express-handlebars");
 const mysql = require("mysql");
-const cookieParser = require("cookie-parser");
 const crypto = require("crypto");
 const session = require("express-session");
 const { v1: uuidv1 } = require("uuid");
@@ -15,9 +15,16 @@ const oneDay = 1000 * 60 * 60 * 24;
 app.use(session({
   secret: "2C44-4D44-WppQ38S", // Store in env variable
   resave: true,
-  saveUninitialized: false,
+  saveUninitialized: true,
   cookie: { maxAge: oneDay }
 }));
+
+// Handlebars config
+app.engine('.hbs', handlebars({
+  extname: '.hbs'
+}));
+app.set('view engine', '.hbs');
+app.set("views", __dirname + "/views/");;
 
 const connection = mysql.createConnection({
     host: "localhost",
@@ -28,157 +35,106 @@ const connection = mysql.createConnection({
 
 connection.connect();
 
-/* Authentication middleware to check session before proceeding to next call */
-const authMiddleware = (req, res, next) => {
-
-  if (!req.session)
-    return;
-
-  getAllUsers().then(users => {
-
-    // Verify session exists and confirm email in session matches with a user in DB before proceeding to next call
-    if (users.length > 0 && users.find(user => user.email === req.session.email)) {
-      return next();
-    } else {
-      res.redirect("/login");
-    }
-  });
-}
-
-/* Called by /login and /registration to validate form data before submitting form. */
-app.post("/api/users/auth", (req, res) => {
-  const { email, password } = req.body;
-  console.log(email, password);
-  const hashedPassword = getHashedPassword(password);
-
-  const sqlQuery = mysql.format("SELECT * FROM USERS WHERE email = ?", [email]);
-  connection.query(sqlQuery, (err, results) => {
-    if (err) {
-      console.log(err);
-      res.status(406).send("Server error, please try again later.");
-    } else if (results.length == 0) {
-      console.log("Account with that email does not exist.");
-      res.status(401).send("Account with that email does not exist.");
-    } else {
-      const user = results[0];
-      if (hashedPassword === user.password) {
-        res.status(200).send();
-      } else {
-        res.status(401).send("Password is not valid.");
-      }
-    }
-  });
-});
-
-/* Called by /login and /registration to get all users to validate form data before submitting form. */
-app.get("/api/users/all", (req, res) => {
-  const sqlQuery = "SELECT * FROM users";
-  connection.query(sqlQuery, (err, results) => {
-    res.status(200).send({ results });
-  });
-});
-
-/* Used to get logged-in user's email from session */
-app.get("/api/users/active", (req, res) => {
-  if (req.session && req.session.email) {
-    console.log("+++")
-    console.log(req.session.email);
-    res.status(200).send({ email: req.session.email });
+const users = [
+  // This user is added to the array to avoid creating a new user on each restart
+  {
+      email: 'test@test.com',
+      // This is the SHA256 hash for value of `password`
+      password: 'XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg='
   }
-});
+];
 
-app.post("/api/users/changePassword", (req, res) => {
-  const { password, confirmPassword } = req.body;
-  console.log("CHANGE PASS")
-  if (req.session && req.session.email) {
-
-    const hashedPassword = getHashedPassword(password);
-    const sqlQuery = mysql.format("UPDATE users SET password = ? WHERE email = ?",
-    [hashedPassword, req.session.email]);
-    connection.query(sqlQuery, (err, results) => {
-      if (err) {
-        console.log(err);
-        res.redirect("/?auth=err");
-      } else {
-        res.redirect("/?auth=success")
-      }
-    });
-  } else {
-    res.redirect("/login");
-  }
-})
-
-app.get("/logout", (req, res) => {
-  req.session.destroy();
-  res.redirect("/login");
-});
-
-/* Called on login form submit. Validates form data one more time. */
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
   const hashedPassword = getHashedPassword(password);
 
-  const sqlQuery = mysql.format("SELECT * FROM users WHERE email = ?", [email]);
-  connection.query(sqlQuery, (err, results) => {
-    if (err) {
-      res.redirect("/login?err=406");
-    } else if (results.length == 0) {
-      console.log("User not found");
-      res.redirect("/login?err=404");
-    } else {
-      const user = results[0];
-      if (hashedPassword === user.password) {
-        req.session.email = email;
-        res.redirect("/");
-      } else {
-        res.redirect("/login?err=401");
-      }
-    }
+  const user = users.find(u => {
+    return u.email === email && hashedPassword === u.password;
   });
+
+  if (user) {
+    req.session.email = email;
+    res.redirect("/");
+  } else {
+    res.render("login", {
+      message: "Invalid email or password.",
+      messageClass: "alert-danger"
+    });
+  }
 });
 
-/* Called on registration form submit. Validates form data one more time. */
 app.post("/registration", (req, res) => {
   const { email, password, confirmPassword } = req.body;
   
-    const userId = uuidv1();
-    const hashedPassword = getHashedPassword(password);
+  if (password === confirmPassword) {
+    console.log("passwords match");
 
-    const sqlQuery = mysql.format("INSERT INTO users (userId, email, password) VALUES (?, ?, ?)",
-    [userId, email, hashedPassword]);
-    connection.query(sqlQuery, (err, results) => {
-      if (err) {
-        res.redirect("/registration?err=406");
-      } else {
-        res.redirect("/login?newUser=true");
-      }
+    if (users.find(user => user.email === email)) {
+      res.render("registration", {
+        message: "Email already in use.",
+        messageClass: "alert-danger"
+      });
+      return;
+    }
+    
+    const hashedPassword = getHashedPassword(password);
+    users.push({
+      email,
+      password: hashedPassword
     });
+    createNewUser(email, password).then(() => {
+      res.render("login", {
+        message: "Registration complete. Please login to continue.",
+        messageClass: "alert-success"
+      });
+    }).catch(err => {
+      res.render("registration", {
+        message: "Server error, please try again.",
+        messageClass: "alert-danger"
+      });
+    });
+
+  } else {
+    res.render("registration", {
+      message: "Passwords do not match.",
+      messageClass: "alert-danger"
+    });
+  }
 });
 
-const getAllUsers = () => {
+const createNewUser = (email, password) => {
   return new Promise((resolve, reject) => {
-    const sqlQuery = "SELECT * FROM users";
+    const userId = uuidv1();
+    const sqlQuery = mysql.format("INSERT INTO users (userId, email, password) VALUES (?, ?, ?)",
+      [userId, email, password]);
     connection.query(sqlQuery, (err, results) => {
       if (err) {
         console.log(err);
-        reject();
+        reject(err);
       } else {
-        resolve(results);
+        console.log("RESOLVE")
+        resolve();
       }
     });
   });
+  
 }
 
 app.get("/registration", (req, res) => {
-  res.sendFile(__dirname + "/registration.html");
+  res.render("registration");
 });
 
 app.get("/login", (req, res) => {
-  res.sendFile(__dirname + "/login.html");
-});
+  res.render("login");
+})
 
-app.get("/", authMiddleware, (req, res) => {
-  res.sendFile(__dirname + "/index.html");
+app.get("/", (req, res) => {
+  if (req.session && users.find(user => user.email === req.session.email))  {
+    console.log("SESSION GOOD")
+    res.sendFile(__dirname + "/index.html");
+  } else {
+      res.render("login");
+  }
 });
 
 app.get("/api/queries/all", (req, res) => {
@@ -259,10 +215,8 @@ app.get("/api/results/refresh/:queryId", (req, res) => {
 app.post("/api/queries/submit", (req, res) => {
   // 1) Validate form data
   const isDataJson = isJson(req.body);
-  if (!isDataJson) {
-    res.status(406).send();
+  if (!isDataJson)
     return;
-  }
 
   const data = parseJson(req.body);
 

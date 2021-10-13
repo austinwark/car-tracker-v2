@@ -99,6 +99,16 @@ Three color scheme:
   }
 }
 
+#change-password-modal {
+  .modal-dialog {
+    max-width: 450px;
+
+    #form-submit-button {
+      width: 100%;
+    }
+  }
+}
+
 main {
     height: 100vh;
     display: flex;
@@ -108,6 +118,9 @@ main {
         background-color: var(--primary-bg-color);
         color: var(--primary-text-color);
 
+        .dropdown-item {
+          font-size: 0.875rem;
+        }
         .bi-search {
             font-size: 2.4rem;
         }
@@ -209,6 +222,77 @@ main {
               font-size: 1rem;
           }
         }
+  }
+}
+
+/* Registration Styles */
+body {
+  background-color: var(--secondary-bg-color);
+
+  .registration-container {
+    max-width: 450px;
+    color: var(--secondary-text-color);
+
+    #registration-form {
+      max-width: 90%;
+      background-color: var(--alice-blue);
+      border-radius: 0.2rem;
+
+      .alert {
+        font-size: 0.8rem;
+        padding: 0.5rem;
+      }
+      button {
+        width: 100%;
+      }
+    }
+
+    .registration-append-message {
+      max-width: 90%;
+      background-color: var(--alice-blue);
+      border-radius: 0.2rem;
+      font-size: 0.8rem;
+
+      a {
+        text-decoration: none;
+        color: var(--blue-ncs);
+      }
+    }
+  }
+}
+
+/* Login Styles */
+body {
+  background-color: var(--secondary-bg-color);
+
+  .login-container {
+    max-width: 450px;
+    color: var(--secondary-text-color);
+
+    #login-form {
+      max-width: 90%;
+      background-color: var(--alice-blue);
+      border-radius: 0.2rem;
+
+      .alert {
+        font-size: 0.8rem;
+        padding: 0.5rem;
+      }
+      button {
+        width: 100%;
+      }
+    }
+
+    .login-append-message {
+      max-width: 90%;
+      background-color: var(--alice-blue);
+      border-radius: 0.2rem;
+      font-size: 0.8rem;
+      a {
+        text-decoration: none;
+        color: var(--blue-ncs);
+      }
+    }
   }
 }
 
