@@ -17,6 +17,15 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/overlayscrollbars/1.13.1/css/OverlayScrollbars.css"
       integrity="sha512-Ho1L8FTfzcVPAlvfkL1BV/Lmy1JDUVAP82/LkhmKbRX5PnQ7CNDHAUp2GZe7ybBpovS+ssJDf+SlBOswrpFr8g=="
       crossorigin="anonymous" referrerpolicy="no-referrer" />
+      <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#00aba9">
+    <meta name="theme-color" content="#ffffff">
     <link rel="stylesheet" href="/styles.css" type="text/css" />
   </head>
 
@@ -25,9 +34,10 @@
       <div class="row m-0 p-0 w-100">
         <!-- *** Side Panel *** -->
         <section id="side-panel" class="col-3">
-          <div class="row">
+          <div class="row header-background">
             <div class="col-12 text-center mt-2">
-              <h1><i class="bi bi-search"></i></h1>
+              <img src="/banner.svg" id="banner"/>
+              <!-- <h1><i class="bi bi-search"></i>Tracker Appr</h1> -->
             </div>
           </div>
           <div class="row">
@@ -42,7 +52,6 @@
                 </ul>
               </div>
             </div>
-            <hr />
           </div>
           <div class="row">
             <div class="
@@ -51,6 +60,7 @@
                   flex-column
                   justify-content-center
                   text-center
+                  my-4
                 ">
               <h2 class="text-center">
                 <i class="bi bi-arrow-left-right"></i> Queries
@@ -71,7 +81,7 @@
         <!-- *** Results Panel *** -->
         <section id="results-panel" class="col-6">
           <div class="d-flex justify-content-between align-items-center">
-            <h2 class="py-2">Query Results</h2>
+            <h3 class="py-2">Query Results</h3>
             <button type="button" class="btn btn-sm btn-primary" id="results-refresh-button">
               <span id="refresh-loader">
                 <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
@@ -238,7 +248,7 @@
             </div>
           </div>
           <!-- Toast message container -->
-    <div class="toast mb-3" id="toast" data-bs-delay="8000" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast mb-3 w-100" id="toast" data-bs-delay="8000" role="alert" aria-live="assertive" aria-atomic="true">
       <div class="toast-header fw-bold me-auto">
         <!-- <img src="..." class="rounded me-2" alt="..."> -->
         <strong class="toast-header-text">
@@ -268,12 +278,11 @@
             <div class="col-12 my-1">
               <label for="create-input-name" class="form-label">Query Name</label>
               <input name="query-name" type="text" class="form-control form-control-sm" id="create-input-name"
-                placeholder="Tacoma for Bob" required value="Testing " />
+                placeholder="Tacoma for Bob" required />
             </div>
             <div class="col-12 my-1">
               <div class="form-check form-switch">
-                <input name="auto-updates" class="form-check-input" type="checkbox" id="create-switch-auto"
-                  value="true" />
+                <input name="auto-updates" class="form-check-input" type="checkbox" id="create-switch-auto" />
                 <label class="form-check-label" for="create-switch-auto">Automatic email updates</label>
               </div>
             </div>
@@ -311,39 +320,37 @@
             <div class="col-6 my-1">
               <label for="create-input-min-price" class="form-label">Min Price</label>
               <input name="min-price" class="form-control form-control-sm" id="create-input-min-price" type="number"
-                step="100" min="0" max="100000" required value="10000" />
+                step="100" min="0" max="100000" required />
             </div>
             <div class="col-6 my-1">
               <label for="create-input-max-price" class="form-label">Max Price</label>
               <input name="max-price" class="form-control form-control-sm" id="create-input-max-price" type="number"
-                step="100" min="0" max="100000" required value="30000" />
+                step="100" min="0" max="100000" required />
             </div>
             <div class="col-6 my-1">
               <label for="create-input-min-year" class="form-label">Min Year</label>
               <input name="min-year" class="form-control form-control-sm" id="create-input-min-year" type="number"
-                step="1" min="2000" max="2022" required value="2010" />
+                step="1" min="1990" max="2022" required />
             </div>
             <div class="col-6 my-1">
               <label for="create-input-max-year" class="form-label">Max Year</label>
               <input name="max-year" class="form-control form-control-sm" id="create-input-max-year" type="number"
-                step="1" min="2000" max="2022" required value="2020" />
+                step="1" min="2000" required />
             </div>
             <hr class="my-2" />
             <h5>Customer Details</h5>
             <div class="col-12 my-1">
               <label for="create-input-customer-name" class="form-label">Customer Name</label>
-              <input name="customer-name" class="form-control form-control-sm" id="create-input-customer-name" type="text"
-                value="Austin Ward" />
+              <input name="customer-name" class="form-control form-control-sm" id="create-input-customer-name" type="text" />
             </div>
             <div class="col-12 my-1">
               <label for="create-input-customer-phone" class="form-label">Customer Phone #</label>
               <input name="customer-phone" class="form-control form-control-sm" id="create-input-customer-phone"
-                type="text" value="(518) 555-5555" />
+                type="text" />
             </div>
             <div class="col-12 my-1">
               <label for="create-input-customer-notes" class="form-label">Notes</label>
-              <input name="notes" class="form-control form-control-sm" id="create-input-customer-notes" type="text"
-                value="Austin needs this ASAP!" />
+              <input name="notes" class="form-control form-control-sm" id="create-input-customer-notes" type="text" />
             </div>
             <div class="col-12 my-1 text-center">
               <button type="submit" class="btn btn-primary">
@@ -431,12 +438,12 @@
               <div class="input-group my-3">
                 <!-- <label for="change-password-input-password" class="form-label">Password</label> -->
                 <span class="input-group-text"><i class="bi bi-key"></i></span>
-                <input name="password" type="password" placeholder="Password" class="form-control form-control-sm" id="change-password-input-password" value="password" />
+                <input name="password" type="password" placeholder="Password" class="form-control form-control-sm" id="change-password-input-password" />
               </div>
               <div class="input-group my-3">
                 <!-- <label for="change-password-input-confirm" class="form-label">Confirm Password</label> -->
                 <span class="input-group-text"><i class="bi bi-arrow-clockwise"></i></span>
-                <input name="confirmPassword" type="password" placeholder="Confirm Password" class="form-control form-control-sm" id="change-password-input-confirm" value="password" />
+                <input name="confirmPassword" type="password" placeholder="Confirm Password" class="form-control form-control-sm" id="change-password-input-confirm" />
               </div>
                 <div class="alert alert-danger text-center" role="alert">
                   
@@ -477,10 +484,16 @@
 
         refreshQueriesAndResults();
         
+        // Hide loaders and alerts
         $("#submit-loader").hide();
         $("#refresh-loader").hide();
         $(".alert").hide();
 
+        // Set max of maxYear dynamically
+        const nextModelYear = new Date().getFullYear() + 1;
+        $("#create-input-max-year").prop("max", nextModelYear);
+
+        // Show user's email
         getActiveUser().then(user => {
           $("#user-email").html(user.email);
         });

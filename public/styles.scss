@@ -118,6 +118,21 @@ main {
         background-color: var(--primary-bg-color);
         color: var(--primary-text-color);
 
+        .header-background {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          // background-color: var(--maroon-x-11);
+          height: 8rem;
+
+          #banner {
+            width: 90%;
+          }
+        }
+        #banner {
+          width: 75%;
+        }
         .dropdown-item {
           font-size: 0.875rem;
         }
@@ -177,6 +192,9 @@ main {
       #results-table {
         background-color: var(--primary-text-color);
         border-radius: 0.2rem;
+        th {
+          border-bottom-color: #dee2e6;
+        }
         td {
           padding: 12px 6px;
         }

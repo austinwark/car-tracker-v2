@@ -112,6 +112,19 @@ main #side-panel {
   background-color: var(--primary-bg-color);
   color: var(--primary-text-color);
 }
+main #side-panel .header-background {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 8rem;
+}
+main #side-panel .header-background #banner {
+  width: 90%;
+}
+main #side-panel #banner {
+  width: 75%;
+}
 main #side-panel .dropdown-item {
   font-size: 0.875rem;
 }
@@ -158,6 +171,9 @@ main #results-panel {
 main #results-panel #results-table {
   background-color: var(--primary-text-color);
   border-radius: 0.2rem;
+}
+main #results-panel #results-table th {
+  border-bottom-color: #dee2e6;
 }
 main #results-panel #results-table td {
   padding: 12px 6px;
