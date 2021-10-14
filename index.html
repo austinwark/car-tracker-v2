@@ -89,7 +89,7 @@
                   <span class="visually-hidden">Loading...</span>
                 </span>
                 <i class="bi bi-arrow-repeat" id="refresh-icon"></i> Refresh</button>
-                <button type="button" id="mobile-settings-button" class="btn btn-sm btn-info d-none d-md-inline-block d-lg-none">
+                <button type="button" id="mobile-settings-md-button" class="btn btn-sm btn-info d-none d-md-inline-block d-lg-none">
                   <i class="bi bi-gear" id="refresh-icon"></i> Settings
                 </button>
             </div>
@@ -555,8 +555,9 @@
           $("#mobile-bottom-nav button").removeClass("nav-active");
           $(event.currentTarget).addClass("nav-active");
         });
-        $("#mobile-settings-button").on("click", event => {
+        $("#mobile-settings-md-button").on("click", event => {
           const buttonDisplay = $(event.currentTarget).css("display");
+          console.log("click")
           // Safe check to ensure button is not clicked when not on screen
           if (buttonDisplay !== "inline-block")
             return;
