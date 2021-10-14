@@ -318,9 +318,39 @@ body {
   }
 }
 
+@media (min-width: 991px) and (max-width: 1199px) {
+  main {
 
+    #meta-panel {
+      font-size: 0.8rem !important;
+  
+      .query-settings-card p {
+        font-size: 0.8rem;
+      }
+    }
 
-@media (max-width: 576px) {
+    #table-container {
+
+      table {
+        font-size: 0.8rem;
+      }
+    }
+  }
+}
+
+@media (max-width: 991px) {
+  #meta-panel {
+    position: absolute;
+    right: 100%;
+    top: 56px;
+  }
+  .panel-active-lg {
+
+    right: 0 !important;
+  }
+}
+
+@media (max-width: 767px) {
 
   .section-container {
     position: relative;
@@ -348,7 +378,7 @@ body {
         overflow: scroll;
 
         table {
-          font-size: 12px;
+          font-size: 0.8rem;
         }
       }
     }

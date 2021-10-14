@@ -33,7 +33,7 @@
     <main class="container-fluid">
       <div class="section-container row m-0 p-0 w-100">
         <!-- *** Side Panel *** -->
-        <section class="panel panel-active col-12 col-md-3" id="side-panel">
+        <section class="panel panel-active col-12 col-md-5 col-lg-3" id="side-panel">
           <div class="row header-background">
             <div class="col-12 text-center mt-2">
               <img src="/banner.svg" id="banner"/>
@@ -79,15 +79,20 @@
         </section>
 
         <!-- *** Results Panel *** -->
-        <section class="panel col-12 col-md-6" id="results-panel">
+        <section class="panel col-12 col-md-7 col-lg-6" id="results-panel">
           <div class="d-flex justify-content-between align-items-center">
             <h3 class="py-2">Query Results</h3>
-            <button type="button" class="btn btn-sm btn-primary" id="results-refresh-button">
-              <span id="refresh-loader">
-                <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
-                <span class="visually-hidden">Loading...</span>
-              </span>
-              <i class="bi bi-arrow-repeat" id="refresh-icon"></i> Refresh</button>
+            <div>
+              <button type="button" class="btn btn-sm btn-primary" id="results-refresh-button">
+                <span id="refresh-loader">
+                  <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                  <span class="visually-hidden">Loading...</span>
+                </span>
+                <i class="bi bi-arrow-repeat" id="refresh-icon"></i> Refresh</button>
+                <button type="button" id="mobile-settings-button" class="btn btn-sm btn-info d-none d-md-inline-block d-lg-none">
+                  <i class="bi bi-gear" id="refresh-icon"></i> Settings
+                </button>
+            </div>
           </div>
           <div id="table-container">
 
@@ -112,8 +117,8 @@
           <h5 id="no-results-msg">No results...</h5>
         </section>
 
-        <!-- *** Meta Panel *** -->
-        <section class="panel col-12 col-md-3 d-flex flex-column justify-content-between" id="meta-panel">
+        <!-- *** Meta Panel *** --> 
+        <section class="panel col-12 col-md-7 col-lg-3 d-flex flex-column justify-content-between" id="meta-panel">
           <div class="accordion" id="meta-panel-accordion">
             <div class="accordion-item">
               <h2 class="accordion-header" id="accordion-heading-one">
@@ -266,7 +271,7 @@
         </section>
 
         <!-- ==== -->
-        <section id="mobile-bottom-nav" class="col-12 d-flex d-sm-none align-items-center p-0">
+        <section id="mobile-bottom-nav" class="col-12 d-flex d-md-none align-items-center p-0">
           <div class="row w-100 m-0">
             <div class="col-4 text-center p-0">
               <button type="button" class="btn btn-primary nav-active" id="mobile-home-button">
@@ -549,6 +554,14 @@
           $("#meta-panel").addClass("panel-active");
           $("#mobile-bottom-nav button").removeClass("nav-active");
           $(event.currentTarget).addClass("nav-active");
+        });
+        $("#mobile-settings-button").on("click", event => {
+          const buttonDisplay = $(event.currentTarget).css("display");
+          // Safe check to ensure button is not clicked when not on screen
+          if (buttonDisplay !== "inline-block")
+            return;
+
+          $("#meta-panel").toggleClass("panel-active-lg");
         });
 
         // Focuses first input in form

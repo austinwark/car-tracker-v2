@@ -267,7 +267,29 @@ body .login-container .login-append-message a {
   color: var(--blue-ncs);
 }
 
-@media (max-width: 576px) {
+@media (min-width: 991px) and (max-width: 1199px) {
+  main #meta-panel {
+    font-size: 0.8rem !important;
+  }
+  main #meta-panel .query-settings-card p {
+    font-size: 0.8rem;
+  }
+  main #table-container table {
+    font-size: 0.8rem;
+  }
+}
+@media (max-width: 991px) {
+  #meta-panel {
+    position: absolute;
+    right: 100%;
+    top: 56px;
+  }
+
+  .panel-active-lg {
+    right: 0 !important;
+  }
+}
+@media (max-width: 767px) {
   .section-container {
     position: relative;
     overflow-x: hidden;
@@ -292,7 +314,7 @@ body .login-container .login-append-message a {
     overflow: scroll;
   }
   .section-container #results-panel #table-container table {
-    font-size: 12px;
+    font-size: 0.8rem;
   }
   .section-container #meta-panel {
     position: absolute;
