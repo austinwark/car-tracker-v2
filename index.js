@@ -24,7 +24,8 @@ const connection = mysql.createConnection({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
-    database: process.env.DB_DATABASE
+    database: process.env.DB_DATABASE,
+    ssl: true
 });
 
 connection.connect();
@@ -54,7 +55,7 @@ app.post("/api/users/auth", (req, res) => {
   const { email, password } = req.body;
   const hashedPassword = getHashedPassword(password);
 
-  const sqlQuery = mysql.format("SELECT * FROM USERS WHERE email = ?", [email]);
+  const sqlQuery = mysql.format("SELECT * FROM users WHERE email = ?", [email]);
   connection.query(sqlQuery, (err, results) => {
     if (err) {
       console.log(err);
