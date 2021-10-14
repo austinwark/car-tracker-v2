@@ -31,9 +31,9 @@
 
   <body>
     <main class="container-fluid">
-      <div class="row m-0 p-0 w-100">
+      <div class="section-container row m-0 p-0 w-100">
         <!-- *** Side Panel *** -->
-        <section id="side-panel" class="col-3">
+        <section class="panel panel-active col-12 col-md-3" id="side-panel">
           <div class="row header-background">
             <div class="col-12 text-center mt-2">
               <img src="/banner.svg" id="banner"/>
@@ -79,7 +79,7 @@
         </section>
 
         <!-- *** Results Panel *** -->
-        <section id="results-panel" class="col-6">
+        <section class="panel col-12 col-md-6" id="results-panel">
           <div class="d-flex justify-content-between align-items-center">
             <h3 class="py-2">Query Results</h3>
             <button type="button" class="btn btn-sm btn-primary" id="results-refresh-button">
@@ -89,28 +89,31 @@
               </span>
               <i class="bi bi-arrow-repeat" id="refresh-icon"></i> Refresh</button>
           </div>
-          <table class="table table-sm table-hover w-100" id="results-table">
-            <thead>
-              <tr>
-                <th scope="col">Stock #</th>
-                <th scope="col">Year</th>
-                <th scope="col">Make</th>
-                <th scope="col">Model</th>
-                <th scope="col">Trim</th>
-                <th scope="col">Price</th>
-                <th scope="col">Ext. Color</th>
-                <th scope="col">Details</th>
-              </tr>
-            </thead>
-            <tbody>
-              <!-- Results -->
-            </tbody>
-          </table>
+          <div id="table-container">
+
+            <table class="table table-sm table-hover w-100 " id="results-table">
+              <thead>
+                <tr>
+                  <th scope="col">Stock #</th>
+                  <th scope="col">Year</th>
+                  <th scope="col">Make</th>
+                  <th scope="col">Model</th>
+                  <th scope="col">Trim</th>
+                  <th scope="col">Price</th>
+                  <th scope="col">Ext. Color</th>
+                  <th scope="col">Details</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Results -->
+              </tbody>
+            </table>
+          </div>
           <h5 id="no-results-msg">No results...</h5>
         </section>
 
         <!-- *** Meta Panel *** -->
-        <section id="meta-panel" class="col-3 d-flex flex-column justify-content-between">
+        <section class="panel col-12 col-md-3 d-flex flex-column justify-content-between" id="meta-panel">
           <div class="accordion" id="meta-panel-accordion">
             <div class="accordion-item">
               <h2 class="accordion-header" id="accordion-heading-one">
@@ -248,18 +251,42 @@
             </div>
           </div>
           <!-- Toast message container -->
-    <div class="toast mb-3 w-100" id="toast" data-bs-delay="8000" role="alert" aria-live="assertive" aria-atomic="true">
-      <div class="toast-header fw-bold me-auto">
-        <!-- <img src="..." class="rounded me-2" alt="..."> -->
-        <strong class="toast-header-text">
-          <!-- Header shown here -->
-        </strong>
-        <button type="button" class="btn-close ms-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-      </div>
-      <div class="toast-body">
-        <!-- Message shown here -->
-      </div>
-    </div>
+          <div class="toast mb-3 w-100" id="toast" data-bs-delay="8000" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header fw-bold me-auto">
+              <!-- <img src="..." class="rounded me-2" alt="..."> -->
+              <strong class="toast-header-text">
+                <!-- Header shown here -->
+              </strong>
+              <button type="button" class="btn-close ms-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+              <!-- Message shown here -->
+            </div>
+          </div>
+        </section>
+
+        <!-- ==== -->
+        <section id="mobile-bottom-nav" class="col-12 d-flex d-sm-none align-items-center p-0">
+          <div class="row w-100 m-0">
+            <div class="col-4 text-center p-0">
+              <button type="button" class="btn btn-primary nav-active" id="mobile-home-button">
+                <i class="bi bi-house-door d-block"></i>
+                <span>Home</span>
+              </button>
+            </div>
+            <div class="col-4 text-center p-0">
+              <button type="button" class="btn btn-primary" id="mobile-results-button">
+                <i class="bi bi-file-bar-graph d-block"></i>
+                <span>Results</span>
+              </button> 
+            </div>
+            <div class="col-4 text-center p-0">
+              <button type="button" class="btn btn-primary" id="mobile-settings-button">
+                <i class="bi bi-gear d-block"></i>
+                <span>Settings</span>
+              </button>
+            </div>
+          </div>
         </section>
       </div>
     </main>
@@ -377,7 +404,7 @@
             </h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="modal-body"><i class="bi bi-cloud-arrow-up" id="submit-icon"></i>
+          <div class="modal-body">
             Are you sure you want to delete <span></span>
           </div>
           <div class="modal-footer">
@@ -392,6 +419,7 @@
       </div>
     </div>
     <!-- Result Details Modal -->
+    <!-- ==== -->
     <div class="modal fade" id="result-details-modal" tabindex="-1" aria-labelledby="result-details-modal-title"
       aria-hidden="true">
       <div class="modal-dialog">
@@ -423,7 +451,6 @@
         </div>
       </div>
     </div>
-    <!-- ==== -->
     <!-- Change Password Modal -->
     <div class="modal fade show" id="change-password-modal" tabindex="-1" aria-labelledby="change-password-modal-title"
       aria-hidden="true">
@@ -500,6 +527,28 @@
 
         $(".offcanvas-body").overlayScrollbars({
           resize: "vertical"
+        });
+        $("#results-panel").overlayScrollbars({
+          resize: "vertical"
+        })
+        // ====
+        $("#mobile-results-button").on("click", event => {
+          $(".panel").removeClass("panel-active");
+          $("#results-panel").addClass("panel-active");
+          $("#mobile-bottom-nav button").removeClass("nav-active");
+          $(event.currentTarget).addClass("nav-active");
+        });
+        $("#mobile-home-button").on("click", event => {
+          $(".panel").removeClass("panel-active");
+          $("#side-panel").addClass("panel-active");
+          $("#mobile-bottom-nav button").removeClass("nav-active");
+          $(event.currentTarget).addClass("nav-active");
+        });
+        $("#mobile-settings-button").on("click", event => {
+          $(".panel").removeClass("panel-active");
+          $("#meta-panel").addClass("panel-active");
+          $("#mobile-bottom-nav button").removeClass("nav-active");
+          $(event.currentTarget).addClass("nav-active");
         });
 
         // Focuses first input in form
@@ -585,7 +634,6 @@
           });
         });
 
-        // ====
         $("#form-submit-button").on("click", () => {
           $(".alert").hide(); // Hide any shown alerts
           const formData = convertFormToJson($("#change-password-form"));
@@ -621,7 +669,7 @@
 
           const slideHtml = `
             <div class="carousel-item ${result.vin == activeVin && "active"}">
-              <div class="w-75 m-auto d-flex justify-content-center">
+              <div class="m-auto d-flex justify-content-center">
                 <span id="carousel-item-counter"><strong>${i + 1}/${numberOfResults}</strong></span>
                 <div class="d-flex flex-column justify-content-between m-2">
                   <div>
@@ -767,6 +815,14 @@
         // Highlight selected query in list
         $(".queries-list").children().removeClass("query-selected")
         $(`[data-id=${queryId}]`).addClass("query-selected");
+
+        // A workaround used to trigger an action if screen size is mobile-sized
+        // (The bottom nav will have a display of 'flex' if screen width is < 576px)
+        const bottomNavDisplayVal = $("#mobile-bottom-nav").css("display");
+        if (bottomNavDisplayVal === "flex") {
+          // Opens result panel by simulating nav click
+          $("#mobile-results-button").click();
+        }
       }
 
       /* Takes a query id and calls ajax GET method to fetch the query's results. Returns a Promise */
