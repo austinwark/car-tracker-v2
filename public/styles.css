@@ -267,6 +267,10 @@ body .login-container .login-append-message a {
   color: var(--blue-ncs);
 }
 
+.confirmation-container {
+  color: var(--secondary-text-color);
+}
+
 @media (min-width: 991px) and (max-width: 1199px) {
   main #meta-panel {
     font-size: 0.8rem !important;

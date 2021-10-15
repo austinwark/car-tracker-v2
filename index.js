@@ -4,7 +4,8 @@ const mysql = require("mysql");
 const cookieParser = require("cookie-parser");
 const crypto = require("crypto");
 const session = require("express-session");
-const { v1: uuidv1 } = require("uuid");
+const uuid = require("uuid");
+const nodemailer = require("nodemailer");
 const Scraper = require("./utils/scraper.js");
 
 const app = express();
@@ -30,6 +31,28 @@ const connection = mysql.createConnection({
 
 connection.connect();
 
+const transport = nodemailer.createTransport({
+  service :"Gmail",
+  auth: {
+    user: process.env.MAILER_USER,
+    pass: process.env.MAILER_PASSWORD
+  }
+});
+
+const sendConfirmationEmail = (name, email, confirmationCode) => {
+  console.log("Check")
+  transport.sendMail({
+    from: process.env.MAILER_USER,
+    to: email,
+    subject: "Please confirm your account",
+    html: `<h1>Email Confirmation</h1>
+          <h2>Hello ${name}</h2>
+          <p>Thank you for signing up for Tracker Appr. Please confirm your email by clicking on the following link below:</p>
+          <br />
+          <a href="http://localhost:3000/api/users/verify/${confirmationCode}> Click here to verify your email</a>`
+  }).catch(error => console.log(error));
+}
+
 /* Authentication middleware to check session before proceeding to next call */
 const authMiddleware = (req, res, next) => {
 
@@ -41,12 +64,21 @@ const authMiddleware = (req, res, next) => {
 
   getAllUsers().then(users => {
 
-    // Verify session exists and confirm email in session matches with a user in DB before proceeding to next call
-    if (users.length > 0 && users.find(user => user.email === req.session.email)) {
+    const user = users.find(user => user.email.toLowerCase() === req.session.email.toLowerCase());
+    if (user) {
+      req.session.emailVerified = true;
+      console.log("EMAIL VERIFIED")
       return next();
     } else {
       res.redirect("/login");
     }
+
+    // Verify session exists and confirm email in session matches with a user in DB before proceeding to next call
+    // if (users.length > 0 && users.find(user => user.email === req.session.email)) {
+    //   return next();
+    // } else {
+    //   res.redirect("/login");
+    // }
   });
 }
 
@@ -84,8 +116,23 @@ app.get("/api/users/all", (req, res) => {
 /* Used to get logged-in user's email from session */
 app.get("/api/users/active", (req, res) => {
   if (req.session && req.session.email) {
-    res.status(200).send({ email: req.session.email });
+    const sqlQuery = mysql.format("SELECT * FROM users WHERE email = ?",
+    [req.session.email]);
+    connection.query(sqlQuery, (err, results) => {
+      if (err) {
+        console.log(err);
+      } else {
+        const user = results[0];
+        console.log(user);
+        if (user) {
+          res.status(200).send({ user });
+        }
+      }
+    })
   }
+  // if (req.session && req.session.email) {
+  //   res.status(200).send({ email: req.session.email, emailVerified: req.session.emailVerified });
+  // }
 });
 
 app.post("/api/users/changePassword", (req, res) => {
@@ -126,6 +173,8 @@ app.post("/login", (req, res) => {
       res.redirect("/login?err=404");
     } else {
       const user = results[0];
+      console.log(user);
+      const confirmationCode = user.emailConfirmationCode;
       if (hashedPassword === user.password) {
         req.session.email = email;
         req.session.userId = user.userId;
@@ -137,18 +186,70 @@ app.post("/login", (req, res) => {
   });
 });
 
+app.get("/api/users/verify/:confirmationCode", (req, res) => {
+  const confirmationCode = req.params.confirmationCode;
+  let sqlQuery = mysql.format("SELECT * FROM users WHERE emailConfirmationCode = ?",
+    [confirmationCode]);
+  
+  connection.query(sqlQuery, (err, results) => {
+    if (err) {
+      console.log(err);
+      res.sendFile(__dirname + "/confirmationError.html");
+    } else {
+
+      const user = results[0];
+      sqlQuery = mysql.format("UPDATE users SET emailVerified = true WHERE userId = ?",
+      [user.userId]) ;
+      connection.query(sqlQuery, (err, results) => {
+        if (err) {
+          console.log(err);
+          res.sendFile(__dirname + "/confirmationError.html");
+        } else {
+          console.log("Email Verification Success!");
+          res.sendFile(__dirname + "/confirmationSuccess.html");
+        }
+      });
+    }
+  });
+});
+
+app.get("/api/users/resend-verification", (req, res) => {
+  if (req.session && req.session.email) {
+    const email = req.session.email;
+    const sqlQuery = mysql.format("SELECT * FROM users WHERE email = ?",
+    [email]);
+    connection.query(sqlQuery, (err, results) => {
+      if (err) {
+        console.log(err);
+      }
+
+      const user = results[0];
+      if (user) {
+        const confirmationCode = user.emailConfirmationCode;
+        sendConfirmationEmail("Austin", email, confirmationCode);
+        res.status(200).send();
+      }
+      // ELSE
+
+    });
+  }
+});
+
 /* Called on registration form submit. Validates form data one more time. */
 app.post("/registration", (req, res) => {
   const { email, password, confirmPassword } = req.body;
-    const userId = uuidv1();
+    const userId = uuid.v1();
+    const confirmationCode = uuid.v4();
     const hashedPassword = getHashedPassword(password);
 
-    const sqlQuery = mysql.format("INSERT INTO users (userId, email, password) VALUES (?, ?, ?)",
-    [userId, email, hashedPassword]);
+    const sqlQuery = mysql.format("INSERT INTO users (userId, email, password, emailConfirmationCode, emailVerified) VALUES (?, ?, ?, ?, false)",
+    [userId, email, hashedPassword, confirmationCode]);
     connection.query(sqlQuery, (err, results) => {
       if (err) {
+        console.log(err);
         res.redirect("/registration?err=406");
       } else {
+        sendConfirmationEmail("Austin", email, confirmationCode);
         res.redirect("/login?newUser=true");
       }
     });

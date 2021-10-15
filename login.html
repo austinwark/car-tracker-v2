@@ -67,7 +67,7 @@
 
           const searchParams = new URLSearchParams(window.location.search);
           if (searchParams.has("newUser")) {
-            showSuccessAlert("Registration successful. Please log in.");
+            showSuccessAlert("Registration successful. An email containing instructions on how to verify your email address has been sent.<br /> You may still login and access the app without verifying your email, but certain functions will be disabled until you do.");
           } else if (searchParams.has("err")) {
             const msg = searchParams.get("err");
             if (msg === "404") {
