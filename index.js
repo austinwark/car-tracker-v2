@@ -5,8 +5,8 @@ const cookieParser = require("cookie-parser");
 const crypto = require("crypto");
 const session = require("express-session");
 const uuid = require("uuid");
-const nodemailer = require("nodemailer");
 const Scraper = require("./utils/scraper.js");
+const Mailer = require("./utils/mailer.js");
 
 const app = express();
 app.use(express.json());
@@ -30,37 +30,6 @@ const connection = mysql.createConnection({
 });
 
 connection.connect();
-
-const transport = nodemailer.createTransport({
-  service :"Gmail",
-  auth: {
-    user: process.env.MAILER_USER,
-    pass: process.env.MAILER_PASSWORD
-  }
-});
-
-const sendConfirmationEmail = (name, email, confirmationCode) => {
-  console.log("Check")
-  transport.sendMail({
-    from: process.env.MAILER_USER,
-    to: email,
-    subject: "Please confirm your account",
-    html: `<h1>Email Confirmation</h1>
-          <h2>Hello ${name}</h2>
-          <p>Thank you for signing up for Tracker Appr. Please confirm your email by clicking on the following link below:</p>
-          <br />
-          <a href="http://localhost:3000/api/users/verify/${confirmationCode}> Click here to verify your email</a>`
-  }).catch(error => console.log(error));
-}
-
-const sendResultsEmail = (email, body, query) => {
-  transport.sendMail({
-    from: process.env.MAILER_USER,
-    to: email,
-    subject: `Results are in from #${query.name}!`,
-    html: body
-  }).catch(err => console.log(err));;
-}
 
 /* Authentication middleware to check session before proceeding to next call */
 const authMiddleware = (req, res, next) => {
@@ -231,7 +200,8 @@ app.get("/api/users/resend-verification", (req, res) => {
       const user = results[0];
       if (user) {
         const confirmationCode = user.emailConfirmationCode;
-        sendConfirmationEmail("Austin", email, confirmationCode);
+        const mailer = new Mailer();
+        mailer.sendConfirmationEmail(email, confirmationCode);
         res.status(200).send();
       }
       // ELSE
@@ -254,7 +224,8 @@ app.post("/registration", (req, res) => {
         console.log(err);
         res.redirect("/registration?err=406");
       } else {
-        sendConfirmationEmail("Austin", email, confirmationCode);
+        const mailer = new Mailer();
+        mailer.sendConfirmationEmail(email, confirmationCode);
         res.redirect("/login?newUser=true");
       }
     });
@@ -354,9 +325,9 @@ app.get("/api/results/refresh/:queryId", authMiddleware, (req, res) => {
             });
             
             // 5) Save results to DB and then send OK response back to front-end
-            saveResults(updatedResultsList).then(() => {
+            saveResults(queryId, updatedResultsList).then(() => {
               res.status(200).send({ queryId });
-            });
+            }).catch(err => res.status(400).send());
           });
         });
     });
@@ -401,9 +372,9 @@ app.post("/api/queries/submit", authMiddleware, (req, res) => {
         }
         
         // 5) Save results to DB and then send OK response back to front-end
-        saveResults(updatedResultsList).then(() => {
+        saveResults(queryId, updatedResultsList).then(() => {
           res.status(200).send({ queryId });
-        });
+        }).catch(err => res.status(400).send());
   
       });
     });
@@ -421,11 +392,19 @@ async function fetchResults(query) {
   return scrapedData;
 }
 
-function saveResults(resultsList) {
+function saveResults(queryId, resultsList) {
   return new Promise((resolve, reject) => {
     if (resultsList.length < 1) {
-      resolve();
-      return;
+      const sqlQuery = mysql.format("DELETE FROM results WHERE queryId = ?",
+        [queryId]);
+        connection.query(sqlQuery, (err, results) => {
+          if (err) {
+            console.log(err);
+            reject(err);
+          } else {
+            resolve();
+          }
+        });
     }
     // Save each result to results table and replace row if already exists
     const sql = "REPLACE INTO results (queryId, stock, make, model, year, trim, extColor, price, vin, intColor, transmission, engine, miles, dealer, link, carfaxLink, imageLink) VALUES ?";
@@ -445,10 +424,8 @@ app.get("/api/results/:queryId/:sortBy/:sortOrder", authMiddleware, (req, res) =
     const queryId = req.params.queryId;
     const sortBy = req.params.sortBy.toLowerCase();
     const sortOrder = req.params.sortOrder.toUpperCase();
-    console.log("SORT BY " + sortBy + " SORT ORDER " + sortOrder);
 
     const sqlQuery = `SELECT * FROM results WHERE queryId = ${queryId} ORDER BY ${sortBy} ${sortOrder}`;
-    console.log(sqlQuery)
     connection.query(sqlQuery, function(err, results) {
         if (err) {
             console.error(err);
@@ -467,9 +444,7 @@ app.post("/api/results/email", (req, res) => {
   
   const { results } = req.body;
   const { queryId } = results[0];
-  console.log(results[0])
   const email = req.session.email;
-  console.log(queryId)
   const sqlQuery = mysql.format("SELECT * FROM queries WHERE queryId = ?",
     [queryId]);
   connection.query(sqlQuery, (err, queryResults) => {
@@ -480,60 +455,11 @@ app.post("/api/results/email", (req, res) => {
     }
 
     const query = queryResults[0];
-    console.log(query)
-    const htmlBody = generateEmailHtml(results.sort((a, b) => {
-      if (a.year < b.year) return 1;
-      else if (a.year === b.year) return 0;
-      else return -1;
-    }));
-    sendResultsEmail(email, htmlBody, query);
+    const mailer = new Mailer();
+    mailer.sendResultsEmail(email, query, results);
     res.send(200).send();
   })
 });
-
-const generateEmailHtml = results => {
-  const numberOfResults = results.length;
-
-  let htmlBody = 
-  `<h1 style="font-size:22px;color:#2b2d42;">A total of ${numberOfResults} results were found that fit your query's parameters.</h1>
-  <table style="border-collapse:collapse;">
-    <tbody>
-      <tr style="background-color:#2b2d42;color:#f4faff;font-size:18px">
-        <th style="padding:4px;border:solid #2b2d42 1px;">Stock #</th>
-        <th style="padding:4px;border:solid #2b2d42 1px;">Year</th>
-        <th style="padding:4px;border:solid #2b2d42 1px;">Make</th>
-        <th style="padding:4px;border:solid #2b2d42 1px;">Model</th>
-        <th style="padding:4px;border:solid #2b2d42 1px;">Trim</th>
-        <th style="padding:4px;border:solid #2b2d42 1px;">Price</th>
-        <th style="padding:4px;border:solid #2b2d42 1px;">Ext. Color</th>
-        <th style="padding:4px;border:solid #2b2d42 1px;">Vin #</th>
-        <th style="padding:4px;border:solid #2b2d42 1px;">Link</th>
-      </tr>
-      ${generateEmailHtmlRows(results)}
-    </tbody>
-    </table>`
-
-  return htmlBody;
-}
-
-const generateEmailHtmlRows = results => {
-  let bodyString = "";
-  for (let result of results) {
-    bodyString += 
-    `<tr style="background-color:#dee7e7ff;color:#2b2d42ff;font-size:16px;text-align:center;">
-      <td style="padding:4px;border:solid #2b2d42 1px;">${result.stock}</td>
-      <td style="padding:4px;border:solid #2b2d42 1px;">${result.year}</td>
-      <td style="padding:4px;border:solid #2b2d42 1px;">${result.make}</td>
-      <td style="padding:4px;border:solid #2b2d42 1px;">${result.model}</td>
-      <td style="padding:4px;border:solid #2b2d42 1px;">${result.trim}</td>
-      <td style="padding:4px;border:solid #2b2d42 1px;">${result.price}</td>
-      <td style="padding:4px;border:solid #2b2d42 1px;">${result.extColor}</td>
-      <td style="padding:4px;border:solid #2b2d42 1px;">${result.vin}</td>
-      <td style="padding:4px;border:solid #2b2d42 1px;"><a href=${result.link} target='_blank'>See More</a></td>
-    </tr>`;
-  }
-  return bodyString;
-}
 
 const getHashedPassword = password => {
   const sha256 = crypto.createHash("sha256");

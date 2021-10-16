@@ -608,7 +608,6 @@
           $emailLoader.show();
           const queryId = $(".query-list-item.query-selected").data("id");
           getQueryResults(queryId).then(queryResults => {
-            console.log(queryResults)
             const resultsData = convertResultsToJson(queryResults.results);
             const obj = { results: resultsData }
             $.ajax({
@@ -749,7 +748,6 @@
       })
 
       const sortResults = (sortBy, sortOrder) => {
-        console.log(sortOrder);
         const queryId = $(".query-list-item.query-selected").data("id");
         getQueryResults(queryId, sortBy, sortOrder).then(displayQueryResults);
       }
@@ -966,7 +964,6 @@
           // Clear all results and hide no results message
           $(".results-row").remove();
           $("#no-results-msg").hide();
-          $("#email-results-button").prop("disabled", false);
           // Loop through results and display each row to HTML page
           for (let i = 0; i < results.length; i++) {
             const result = results[i];
@@ -1035,7 +1032,6 @@
           dataObject[`result${i}`] = results[i]; 
         }
         
-        console.log(dataObject);
         return dataObject;
       }
 
