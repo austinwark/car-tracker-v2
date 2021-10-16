@@ -23,11 +23,11 @@ module.exports = class Mailer {
             <h2>Hello!</h2>
             <p>Thank you for signing up for Tracker Appr. Please confirm your email by clicking on the following link below:</p>
             <br />
-            <a href="http://localhost:3000/api/users/verify/${confirmationCode}"> Click here to verify your email</a>`
+            <a href="https://tracker-appr2.herokuapp.com/api/users/verify/${confirmationCode}"> Click here to verify your email</a>`
     }).catch(error => console.log(error));
   }
 
-  sendResultsEmail(email, query, results) {
+  sendResultsEmail(email, query, results, confirmationCode) {
     return new Promise((resolve, reject) => {
 
       if (this.onlyNew && results.every(result => !result.isNewResult)) {
@@ -35,7 +35,7 @@ module.exports = class Mailer {
         return;
       }
 
-      const htmlBody = this.generateEmailHtml(results);
+      const htmlBody = this.generateEmailHtml(results, confirmationCode);
       this.transport.sendMail({
         from: process.env.MAILER_USER,
         to: email,
@@ -52,7 +52,7 @@ module.exports = class Mailer {
     });
   }
 
-  generateEmailHtml(results) {
+  generateEmailHtml(results, confirmationCode) {
     let oldResults = results;
     if (this.onlyNew) {
       results = oldResults.filter(result => result.isNewResult);
@@ -76,7 +76,9 @@ module.exports = class Mailer {
         </tr>
         ${this.generateEmailHtmlRows(results)}
       </tbody>
-      </table>`
+      </table>
+      <br />
+      <p style="padding:4px;color:#2b2d42;">If you no longer wish to receive alerts from Tracker Appr, <a href="http://localhost:3000/api/users/unsubscribe/${confirmationCode}" target="_blank">Unsubscribe</a></p>`
   
     return htmlBody;
   }

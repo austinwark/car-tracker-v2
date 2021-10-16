@@ -64,7 +64,8 @@ app.post("/api/users/auth", (req, res) => {
   const { email, password } = req.body;
   const hashedPassword = getHashedPassword(password);
 
-  const sqlQuery = mysql.format("SELECT * FROM users WHERE email = ?", [email]);
+  const sqlQuery = mysql.format("SELECT * FROM users WHERE email = ?",
+    [email.toLowerCase()]);
   connection.query(sqlQuery, (err, results) => {
     if (err) {
       console.log(err);
@@ -141,7 +142,8 @@ app.post("/login", (req, res) => {
   const { email, password } = req.body;
   const hashedPassword = getHashedPassword(password);
 
-  const sqlQuery = mysql.format("SELECT * FROM users WHERE email = ?", [email]);
+  const sqlQuery = mysql.format("SELECT * FROM users WHERE email = ?",
+    [email.toLowerCase()]);
   connection.query(sqlQuery, (err, results) => {
     if (err) {
       res.redirect("/login?err=406");
@@ -151,7 +153,7 @@ app.post("/login", (req, res) => {
       const user = results[0];
       const confirmationCode = user.emailConfirmationCode;
       if (hashedPassword === user.password) {
-        req.session.email = email;
+        req.session.email = email.toLowerCase();
         req.session.userId = user.userId;
         res.redirect("/");
       } else {
@@ -218,14 +220,14 @@ app.post("/registration", (req, res) => {
     const hashedPassword = getHashedPassword(password);
 
     const sqlQuery = mysql.format("INSERT INTO users (userId, email, password, emailConfirmationCode, emailVerified) VALUES (?, ?, ?, ?, false)",
-    [userId, email, hashedPassword, confirmationCode]);
+    [userId, email.toLowerCase(), hashedPassword, confirmationCode]);
     connection.query(sqlQuery, (err, results) => {
       if (err) {
         console.log(err);
         res.redirect("/registration?err=406");
       } else {
         const mailer = new Mailer();
-        mailer.sendConfirmationEmail(email, confirmationCode);
+        mailer.sendConfirmationEmail(email.toLowerCase(), confirmationCode);
         res.redirect("/login?newUser=true");
       }
     });
@@ -440,11 +442,21 @@ app.get("/api/results/:queryId/:sortBy/:sortOrder", authMiddleware, (req, res) =
     });
 });
 
-app.post("/api/results/email", (req, res) => {
+app.post("/api/results/email", async (req, res) => {
   
   const { results } = req.body;
   const { queryId } = results[0];
   const email = req.session.email;
+
+  // Get all users
+  const allUsers = await getAllUsers();
+  // Find the signed in user for the emailConfirmationCode
+  const user = allUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
+  if (!user) {
+    res.status(401).send();
+    return;
+  }
+  
   const sqlQuery = mysql.format("SELECT * FROM queries WHERE queryId = ?",
     [queryId]);
   connection.query(sqlQuery, (err, queryResults) => {
@@ -456,10 +468,53 @@ app.post("/api/results/email", (req, res) => {
 
     const query = queryResults[0];
     const mailer = new Mailer();
-    mailer.sendResultsEmail(email, query, results);
+    mailer.sendResultsEmail(email, query, results, user.emailConfirmationCode);
     res.send(200).send();
   })
 });
+
+/* Called by clicking unsubscribe link in results email. Switches the user's emailVerified status to false */
+app.get("/api/users/unsubscribe/:confirmationCode", (req, res) => {
+
+  // Find the user in DB using the same confirmationCode used to verify the user's email address
+  const confirmationCode = req.params.confirmationCode;
+  const sqlQuery = mysql.format("SELECT * FROM users WHERE emailConfirmationCode = ?",
+    [confirmationCode]);
+  connection.query(sqlQuery, (err, results) => {
+    if (err) {
+      console.log(err);
+      res.sendFile(__dirname + "/unsubscribeError.html");
+      return;
+    }
+
+    const user = results[0];
+    const { userId } = user;
+    // Switch user's emailVerified status to false and show confirmation/error page */
+    resetEmailConfirmation(userId).then(() => {
+      res.sendFile(__dirname + "/unsubscribeSuccess.html");
+    }).catch(err => {
+      console.log(err);
+      res.sendFile(__dirname + "/unsubscribeError.html");
+    });
+  });
+});
+
+/* Helper function to reset a user's emailVerified status */
+const resetEmailConfirmation = userId => {
+  return new Promise((resolve, reject) => {
+
+    const sqlQuery = mysql.format("UPDATE users SET emailVerified = false WHERE userId = ?",
+      [userId]);
+    connection.query(sqlQuery, (err, results) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+
+      resolve();
+    });
+  });
+}
 
 const getHashedPassword = password => {
   const sha256 = crypto.createHash("sha256");
