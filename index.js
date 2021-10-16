@@ -4,8 +4,9 @@ const mysql = require("mysql");
 const cookieParser = require("cookie-parser");
 const crypto = require("crypto");
 const session = require("express-session");
-const { v1: uuidv1 } = require("uuid");
+const uuid = require("uuid");
 const Scraper = require("./utils/scraper.js");
+const Mailer = require("./utils/mailer.js");
 
 const app = express();
 app.use(express.json());
@@ -41,12 +42,20 @@ const authMiddleware = (req, res, next) => {
 
   getAllUsers().then(users => {
 
-    // Verify session exists and confirm email in session matches with a user in DB before proceeding to next call
-    if (users.length > 0 && users.find(user => user.email === req.session.email)) {
+    const user = users.find(user => user.email.toLowerCase() === req.session.email.toLowerCase());
+    if (user) {
+      req.session.emailVerified = true;
       return next();
     } else {
       res.redirect("/login");
     }
+
+    // Verify session exists and confirm email in session matches with a user in DB before proceeding to next call
+    // if (users.length > 0 && users.find(user => user.email === req.session.email)) {
+    //   return next();
+    // } else {
+    //   res.redirect("/login");
+    // }
   });
 }
 
@@ -84,8 +93,22 @@ app.get("/api/users/all", (req, res) => {
 /* Used to get logged-in user's email from session */
 app.get("/api/users/active", (req, res) => {
   if (req.session && req.session.email) {
-    res.status(200).send({ email: req.session.email });
+    const sqlQuery = mysql.format("SELECT * FROM users WHERE email = ?",
+    [req.session.email]);
+    connection.query(sqlQuery, (err, results) => {
+      if (err) {
+        console.log(err);
+      } else {
+        const user = results[0];
+        if (user) {
+          res.status(200).send({ user });
+        }
+      }
+    })
   }
+  // if (req.session && req.session.email) {
+  //   res.status(200).send({ email: req.session.email, emailVerified: req.session.emailVerified });
+  // }
 });
 
 app.post("/api/users/changePassword", (req, res) => {
@@ -126,6 +149,7 @@ app.post("/login", (req, res) => {
       res.redirect("/login?err=404");
     } else {
       const user = results[0];
+      const confirmationCode = user.emailConfirmationCode;
       if (hashedPassword === user.password) {
         req.session.email = email;
         req.session.userId = user.userId;
@@ -137,18 +161,71 @@ app.post("/login", (req, res) => {
   });
 });
 
+app.get("/api/users/verify/:confirmationCode", (req, res) => {
+  const confirmationCode = req.params.confirmationCode;
+  let sqlQuery = mysql.format("SELECT * FROM users WHERE emailConfirmationCode = ?",
+    [confirmationCode]);
+  
+  connection.query(sqlQuery, (err, results) => {
+    if (err) {
+      console.log(err);
+      res.sendFile(__dirname + "/confirmationError.html");
+    } else {
+
+      const user = results[0];
+      sqlQuery = mysql.format("UPDATE users SET emailVerified = true WHERE userId = ?",
+      [user.userId]) ;
+      connection.query(sqlQuery, (err, results) => {
+        if (err) {
+          console.log(err);
+          res.sendFile(__dirname + "/confirmationError.html");
+        } else {
+          res.sendFile(__dirname + "/confirmationSuccess.html");
+        }
+      });
+    }
+  });
+});
+
+app.get("/api/users/resend-verification", (req, res) => {
+  if (req.session && req.session.email) {
+    const email = req.session.email;
+    const sqlQuery = mysql.format("SELECT * FROM users WHERE email = ?",
+    [email]);
+    connection.query(sqlQuery, (err, results) => {
+      if (err) {
+        console.log(err);
+      }
+
+      const user = results[0];
+      if (user) {
+        const confirmationCode = user.emailConfirmationCode;
+        const mailer = new Mailer();
+        mailer.sendConfirmationEmail(email, confirmationCode);
+        res.status(200).send();
+      }
+      // ELSE
+
+    });
+  }
+});
+
 /* Called on registration form submit. Validates form data one more time. */
 app.post("/registration", (req, res) => {
   const { email, password, confirmPassword } = req.body;
-    const userId = uuidv1();
+    const userId = uuid.v1();
+    const confirmationCode = uuid.v4();
     const hashedPassword = getHashedPassword(password);
 
-    const sqlQuery = mysql.format("INSERT INTO users (userId, email, password) VALUES (?, ?, ?)",
-    [userId, email, hashedPassword]);
+    const sqlQuery = mysql.format("INSERT INTO users (userId, email, password, emailConfirmationCode, emailVerified) VALUES (?, ?, ?, ?, false)",
+    [userId, email, hashedPassword, confirmationCode]);
     connection.query(sqlQuery, (err, results) => {
       if (err) {
+        console.log(err);
         res.redirect("/registration?err=406");
       } else {
+        const mailer = new Mailer();
+        mailer.sendConfirmationEmail(email, confirmationCode);
         res.redirect("/login?newUser=true");
       }
     });
@@ -248,9 +325,9 @@ app.get("/api/results/refresh/:queryId", authMiddleware, (req, res) => {
             });
             
             // 5) Save results to DB and then send OK response back to front-end
-            saveResults(updatedResultsList).then(() => {
+            saveResults(queryId, updatedResultsList).then(() => {
               res.status(200).send({ queryId });
-            });
+            }).catch(err => res.status(400).send());
           });
         });
     });
@@ -295,9 +372,9 @@ app.post("/api/queries/submit", authMiddleware, (req, res) => {
         }
         
         // 5) Save results to DB and then send OK response back to front-end
-        saveResults(updatedResultsList).then(() => {
+        saveResults(queryId, updatedResultsList).then(() => {
           res.status(200).send({ queryId });
-        });
+        }).catch(err => res.status(400).send());
   
       });
     });
@@ -315,11 +392,19 @@ async function fetchResults(query) {
   return scrapedData;
 }
 
-function saveResults(resultsList) {
+function saveResults(queryId, resultsList) {
   return new Promise((resolve, reject) => {
     if (resultsList.length < 1) {
-      resolve();
-      return;
+      const sqlQuery = mysql.format("DELETE FROM results WHERE queryId = ?",
+        [queryId]);
+        connection.query(sqlQuery, (err, results) => {
+          if (err) {
+            console.log(err);
+            reject(err);
+          } else {
+            resolve();
+          }
+        });
     }
     // Save each result to results table and replace row if already exists
     const sql = "REPLACE INTO results (queryId, stock, make, model, year, trim, extColor, price, vin, intColor, transmission, engine, miles, dealer, link, carfaxLink, imageLink) VALUES ?";
@@ -335,10 +420,12 @@ function saveResults(resultsList) {
   });
 }
 
-app.get("/api/results/:queryId", authMiddleware, (req, res) => {
+app.get("/api/results/:queryId/:sortBy/:sortOrder", authMiddleware, (req, res) => {
     const queryId = req.params.queryId;
+    const sortBy = req.params.sortBy.toLowerCase();
+    const sortOrder = req.params.sortOrder.toUpperCase();
 
-    const sqlQuery = `SELECT * FROM results WHERE queryId = ${queryId}`;
+    const sqlQuery = `SELECT * FROM results WHERE queryId = ${queryId} ORDER BY ${sortBy} ${sortOrder}`;
     connection.query(sqlQuery, function(err, results) {
         if (err) {
             console.error(err);
@@ -350,8 +437,29 @@ app.get("/api/results/:queryId", authMiddleware, (req, res) => {
             }
             res.status(200).send(responseData);
         }
-    })
-})
+    });
+});
+
+app.post("/api/results/email", (req, res) => {
+  
+  const { results } = req.body;
+  const { queryId } = results[0];
+  const email = req.session.email;
+  const sqlQuery = mysql.format("SELECT * FROM queries WHERE queryId = ?",
+    [queryId]);
+  connection.query(sqlQuery, (err, queryResults) => {
+    if (err) {
+      console.log(err);
+      res.status(400).send(err);
+      return;
+    }
+
+    const query = queryResults[0];
+    const mailer = new Mailer();
+    mailer.sendResultsEmail(email, query, results);
+    res.send(200).send();
+  })
+});
 
 const getHashedPassword = password => {
   const sha256 = crypto.createHash("sha256");

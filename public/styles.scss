@@ -198,6 +198,26 @@ main {
           th {
             border-bottom-color: #dee2e6;
           }
+          .sort-button {
+            font-size: 1rem;
+            font-weight: 700;
+
+            .bi-arrow-down-short::before {
+              transform: scale(1.5);
+              opacity: 0.4;
+            }
+          }
+          .sort-button.asc .bi-arrow-down-short::before {
+            transform: rotate(180deg) scale(1.5);
+          }
+          .sort-button.active {
+            font-weight: 800;
+
+            .bi-arrow-down-short::before {
+              opacity: 1;
+            }
+          }
+          
           td {
             padding: 12px 6px;
           }
@@ -316,6 +336,10 @@ body {
       }
     }
   }
+}
+
+.confirmation-container {
+  color: var(--secondary-text-color);
 }
 
 @media (min-width: 991px) and (max-width: 1199px) {

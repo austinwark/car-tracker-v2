@@ -34,12 +34,12 @@
         <div class="input-group my-3">
           <!-- <label for="login-input-email" class="form-label">Email</label> -->
           <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-          <input name="email" type="email" placeholder="Email Address" class="form-control form-control-sm" id="login-input-email" />
+          <input name="email" type="email" placeholder="Email Address" class="form-control form-control-sm" id="login-input-email" value="austinwark96@gmail.com" />
         </div>
         <div class="input-group my-3">
           <!-- <label for="login-input-password" class="form-label">Password</label> -->
           <span class="input-group-text"><i class="bi bi-key"></i></span>
-          <input name="password" type="password" placeholder="Password" class="form-control form-control-sm" id="login-input-password" />
+          <input name="password" type="password" placeholder="Password" class="form-control form-control-sm" id="login-input-password" value="password" />
         </div>
           <div class="alert alert-danger text-center" role="alert">
 
@@ -67,7 +67,7 @@
 
           const searchParams = new URLSearchParams(window.location.search);
           if (searchParams.has("newUser")) {
-            showSuccessAlert("Registration successful. Please log in.");
+            showSuccessAlert("Registration successful. An email containing instructions on how to verify your email address has been sent.<br /> You may still login and access the app without verifying your email, but certain functions will be disabled until you do.");
           } else if (searchParams.has("err")) {
             const msg = searchParams.get("err");
             if (msg === "404") {
