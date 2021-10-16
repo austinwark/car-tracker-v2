@@ -45,51 +45,85 @@ const getAllQueries = users => {
   });
 }
 
-const scrapeAndProcessResults = (user, queries) => {
+/* Called for each user, scrapes new data for each query, logs, and emails the results */
+const scrapeAndProcessResults = async (user, queries) => {
   const { email, emailVerified } = user;
 
-  // For each of the user's queries saved in DB
-  for (let query of queries) {
+  // Keeps track of total stats. Used to send email log */
+  let totalNumberOfEmailsSent = 0;
+  let totalNumberOfResultsSent = 0;
+
+  // For each of the user's queries
+  for (let i = 0; i < queries.length; i++) {
+    const query = queries[i];
     const { queryId, autoUpdates, onlyNew } = query;
 
-    // Scrape results (resultsList)
-    fetchResults(query).then(resultsList => {
-      query.numberOfResults = resultsList.length;
+    // Fetch scraped results
+    const resultsList = await fetchResults(query);
+    query.numberOfResults = resultsList.length;
+    
+    // Update query's numberOfResults in DB
+    const sqlQuery = mysql.format("REPLACE INTO queries (queryId, userId, name, autoUpdates, onlyNew, allDealerships, model, minPrice, maxPrice, minYear, maxYear, customerName, customerPhone, notes, numberOfResults, createdDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [...Object.values(query)]);
+    connection.query(sqlQuery, async err => {
+      if (err) console.log(err);
 
-      // Update query's numberOfResults in DB
-      const sqlQuery = mysql.format("REPLACE INTO queries (queryId, userId, name, autoUpdates, onlyNew, allDealerships, model, minPrice, maxPrice, minYear, maxYear, customerName, customerPhone, notes, numberOfResults, createdDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        [...Object.values(query)]);
-      connection.query(sqlQuery, err => {
-        if (err) console.log(err);
-        
-        // Update the results' isNewResult field in DB
-        setScrapedResultsViewed(queryId, resultsList).then(updatedResults => {
-              
-          // Only email results if autoUpdates is enabled and email is verified
-          if (updatedResults.length > 0 && autoUpdates && emailVerified) {
-            
-            // Pass results to Mailer instance to be processed and sent to user
-            const mailer = new Mailer(onlyNew);
-            mailer.sendResultsEmail(email, query, updatedResults).then(resultsSent => {
+      // Update the results' isNewResult fields in DB
+      let updatedResults = await setScrapedResultsViewed(queryId, resultsList);
 
-              // sendResultsEmail returns boolean indicating whether results were emailed or not
-              // If results were emailed -- log the data to file
-              if (resultsSent)
-                logJobData(email, query, updatedResults);
-              
-              // Then save results to DB. Email went through so saveResults is told to set results as viewed
-              saveResults(queryId, true, updatedResults);
-            }).catch(err => {
+      // Only email results if autoUpdates is enabled and email is verified
+      if (updatedResults.length > 0 && autoUpdates && emailVerified) {
 
-              // If Mailer error, still save results to DB but do not set results as viewed
-              saveResults(queryId, false, updatedResults);
-            });
-          }
-        });
-      });
-    });
+        // Pass results to Mailer to be filtered and sent to user. Returns number of results and emails sent
+        const { numberOfResultsSent, numberOfEmailsSent } = await sendAndSaveResults(email, query, updatedResults);
+        totalNumberOfEmailsSent += numberOfEmailsSent;
+        totalNumberOfResultsSent += numberOfResultsSent;
+      }
+
+      // When on last iteration, send logs to admin
+      if (i == queries.length - 1) {
+        const path = __dirname + "/job-log.json";
+        sendLogsToEmail(path, totalNumberOfEmailsSent, totalNumberOfResultsSent);
+      }
+    })
   }
 }
+
+/* Uses a Mailer instance to send job logs to admin's email */
+const sendLogsToEmail = async (path, numberOfEmailsSent, numberOfResultsSent) => {
+  const mailer = new Mailer();
+  mailer.sendLogsEmail(path, numberOfEmailsSent, numberOfResultsSent);
+}
+
+/* Sends results to user's email and saves results to DB */
+const sendAndSaveResults = async (email, query, results) => {
+  // Keeps track of stats to send to admin 
+  let numberOfEmailsSent = 0;
+  let numberOfResultsSent = 0;
+
+  return new Promise(async (resolve, reject) => {
+    try {
+      // Send results to user's email, returns number of results sent after filtering for onlyNew results (if setting is on)
+      const mailer = new Mailer(query.onlyNew);
+      numberOfResultsSent = await mailer.sendResultsEmail(email, query, results);
+
+      // Save results to DB. The email went through so setResultsViewed = true
+      saveResults(query.queryId, true, results);
+    } catch (err) {
+      console.log(err);
+
+      // Save results to DB. The email did not go through so setResultsViewed = false
+      saveResults(query.queryId, false, results);
+    }
+    // Log the data if results were sent to user
+    if (numberOfResultsSent > 0) {
+      numberOfEmailsSent++;
+      await logJobData(email, query, results);
+    }
+    resolve({ numberOfEmailsSent, numberOfResultsSent });
+  })
+}
+
 
 /* Checks scraped results against results in DB to persist isResultNew value */
 const setScrapedResultsViewed = (queryId, scrapedResults) => {
@@ -140,21 +174,6 @@ const saveResults = (queryId, setResultsViewed, resultsObj) => {
   });
 
   return new Promise((resolve, reject) => {
-    // if (resultsList.length < 1) {
-
-    //   const sqlQuery = mysql.format("DELETE FROM results WHERE queryId = ?",
-    //     [queryId]);
-    //     connection.query(sqlQuery, (err, results) => {
-    //       if (err) {
-    //         console.log(err);
-    //         reject(err);
-    //         return;
-    //       } else {
-    //         resolve();
-    //         return;
-    //       }
-    //     });
-    // }
 
     // Delete the query's current results in DB
     deleteQueryResults(queryId).then(() => {
@@ -213,39 +232,45 @@ async function fetchResults(query) {
 
 /* Logs data for every email sent by this scheduled job */
 function logJobData(email, query, results) {
-  const path = __dirname + "/job-log.json";
-  const date = new Date();
-	const isoDateTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString();
-  
-  const dataObj = {
-    timeStamp: isoDateTime,
-    email,
-    query,
-    results
-  }
-  const baseObj = {
-    logData: []
-  }
 
-  // This will overwrite the file contents with baseObj (empty array)
-  // fs.writeFileSync(path, JSON.stringify(baseObj));
+  return new Promise((resolve, reject) => {
 
-  // Get current file contents
-  getFileContents(path).then(contents => {
+    const path = __dirname + "/job-log.json";
+    const date = new Date();
+    const isoDateTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString();
     
-    // If file is not empty (contents !== null)
-    if (contents) {
-
-      // Push data to array in file and save the result
-      contents.logData.push(dataObj);
-      fs.writeFileSync(path, JSON.stringify(contents));
-    } else {
-
-      // If file is empty -- write the base object with data to file
-      baseObj.logData.push(dataObj);
-      fs.writeFileSync(path, JSON.stringify(baseObj));
+    const dataObj = {
+      timeStamp: isoDateTime,
+      email,
+      query,
+      results
     }
-  });
+    const baseObj = {
+      logData: []
+    }
+  
+    // This will overwrite the file contents with baseObj (empty array)
+    // fs.writeFileSync(path, JSON.stringify(baseObj));
+  
+    // Get current file contents
+    getFileContents(path).then(contents => {
+      
+      // If file is not empty (contents !== null)
+      if (contents) {
+  
+        // Push data to array in file and save the result
+        contents.logData.unshift(dataObj);
+        fs.writeFileSync(path, JSON.stringify(contents));
+        resolve(path);
+      } else {
+  
+        // If file is empty -- write the base object with data to file
+        baseObj.logData.push(dataObj);
+        fs.writeFileSync(path, JSON.stringify(baseObj));
+        resolve(path);
+      }
+    });
+  })
 }
 
 /* Helper function to get contents of file */
@@ -256,7 +281,6 @@ const getFileContents = async path => {
     contents = JSON.parse(data);
   else
     contents = null;
-  console.log(contents)
   return contents;
 }
 

@@ -28,11 +28,40 @@ module.exports = class Mailer {
     }).catch(error => console.log(error));
   }
 
+  sendLogsEmail(filePath, numberOfEmailsSent, numberOfResultsSent) {
+
+    const currentDateTime = new Date().toLocaleDateString(
+      "en-US",
+      { month: "2-digit",
+        day: "2-digit", 
+        year: "numeric", 
+        hour: "numeric",
+        minute: "numeric" }
+    );
+
+    const htmlBody = `
+    <h1>A new batch of results were sent!</h1>
+    <h3>Number of emails sent: ${numberOfEmailsSent}</h3>
+    <h3>Number of results sent: ${numberOfResultsSent}</h3>
+    `;
+    this.transport.sendMail({
+      from: process.env.MAILER_USER,
+      to: process.env.MAILER_USER,
+      subject: `New logs are in! [${currentDateTime}]`,
+      html: htmlBody,
+      attachments: [{ path: filePath }]
+    }, (err, info) => {
+      if (err) {
+        console.log(err)
+      }
+    });
+  }
+
   sendResultsEmail(email, query, results, confirmationCode) {
     return new Promise((resolve, reject) => {
 
       if (this.onlyNew && results.every(result => !result.isNewResult)) {
-        resolve(false);
+        resolve(0);
         return;
       }
 
@@ -44,6 +73,13 @@ module.exports = class Mailer {
           hour: "numeric",
           minute: "numeric" }
       );
+
+      // If onlyNew option is enabled, filter for results where isNewResult == true
+      if (this.onlyNew) {
+        let oldResults = results;
+        results = oldResults.filter(result => result.isNewResult);
+      }
+
       const htmlBody = this.generateEmailHtml(results, confirmationCode);
       
       this.transport.sendMail({
@@ -56,17 +92,14 @@ module.exports = class Mailer {
           reject();
         } else {
           console.log("Email sent successfully.");
-          resolve(true);
+          resolve(results.length);
         }
       });
     });
   }
 
   generateEmailHtml(results, confirmationCode) {
-    let oldResults = results;
-    if (this.onlyNew) {
-      results = oldResults.filter(result => result.isNewResult);
-    }
+    
     const numberOfResults = results.length;
     const currentDate = new Date().toLocaleDateString(
       "en-US",
