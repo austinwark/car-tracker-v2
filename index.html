@@ -578,7 +578,6 @@
         });
         $("#mobile-settings-md-button").on("click", event => {
           const buttonDisplay = $(event.currentTarget).css("display");
-          console.log("click")
           // Safe check to ensure button is not clicked when not on screen
           if (buttonDisplay !== "inline-block")
             return;
