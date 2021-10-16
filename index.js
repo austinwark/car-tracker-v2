@@ -53,6 +53,15 @@ const sendConfirmationEmail = (name, email, confirmationCode) => {
   }).catch(error => console.log(error));
 }
 
+const sendResultsEmail = (email, body, query) => {
+  transport.sendMail({
+    from: process.env.MAILER_USER,
+    to: email,
+    subject: `Results are in from #${query.name}!`,
+    html: body
+  }).catch(err => console.log(err));;
+}
+
 /* Authentication middleware to check session before proceeding to next call */
 const authMiddleware = (req, res, next) => {
 
@@ -67,7 +76,6 @@ const authMiddleware = (req, res, next) => {
     const user = users.find(user => user.email.toLowerCase() === req.session.email.toLowerCase());
     if (user) {
       req.session.emailVerified = true;
-      console.log("EMAIL VERIFIED")
       return next();
     } else {
       res.redirect("/login");
@@ -123,7 +131,6 @@ app.get("/api/users/active", (req, res) => {
         console.log(err);
       } else {
         const user = results[0];
-        console.log(user);
         if (user) {
           res.status(200).send({ user });
         }
@@ -173,7 +180,6 @@ app.post("/login", (req, res) => {
       res.redirect("/login?err=404");
     } else {
       const user = results[0];
-      console.log(user);
       const confirmationCode = user.emailConfirmationCode;
       if (hashedPassword === user.password) {
         req.session.email = email;
@@ -205,7 +211,6 @@ app.get("/api/users/verify/:confirmationCode", (req, res) => {
           console.log(err);
           res.sendFile(__dirname + "/confirmationError.html");
         } else {
-          console.log("Email Verification Success!");
           res.sendFile(__dirname + "/confirmationSuccess.html");
         }
       });
@@ -451,8 +456,80 @@ app.get("/api/results/:queryId", authMiddleware, (req, res) => {
             }
             res.status(200).send(responseData);
         }
-    })
-})
+    });
+});
+
+app.post("/api/results/email", (req, res) => {
+  
+  const { results } = req.body;
+  const { queryId } = results[0];
+  console.log(results[0])
+  const email = req.session.email;
+  console.log(queryId)
+  const sqlQuery = mysql.format("SELECT * FROM queries WHERE queryId = ?",
+    [queryId]);
+  connection.query(sqlQuery, (err, queryResults) => {
+    if (err) {
+      console.log(err);
+      res.status(400).send(err);
+      return;
+    }
+
+    const query = queryResults[0];
+    console.log(query)
+    const htmlBody = generateEmailHtml(results.sort((a, b) => {
+      if (a.year < b.year) return 1;
+      else if (a.year === b.year) return 0;
+      else return -1;
+    }));
+    sendResultsEmail(email, htmlBody, query);
+    res.send(200).send();
+  })
+});
+
+const generateEmailHtml = results => {
+  const numberOfResults = results.length;
+
+  let htmlBody = 
+  `<h1 style="font-size:22px;color:#2b2d42;">A total of ${numberOfResults} results were found that fit your query's parameters.</h1>
+  <table style="border-collapse:collapse;">
+    <tbody>
+      <tr style="background-color:#2b2d42;color:#f4faff;font-size:18px">
+        <th style="padding:4px;border:solid #2b2d42 1px;">Stock #</th>
+        <th style="padding:4px;border:solid #2b2d42 1px;">Year</th>
+        <th style="padding:4px;border:solid #2b2d42 1px;">Make</th>
+        <th style="padding:4px;border:solid #2b2d42 1px;">Model</th>
+        <th style="padding:4px;border:solid #2b2d42 1px;">Trim</th>
+        <th style="padding:4px;border:solid #2b2d42 1px;">Price</th>
+        <th style="padding:4px;border:solid #2b2d42 1px;">Ext. Color</th>
+        <th style="padding:4px;border:solid #2b2d42 1px;">Vin #</th>
+        <th style="padding:4px;border:solid #2b2d42 1px;">Link</th>
+      </tr>
+      ${generateEmailHtmlRows(results)}
+    </tbody>
+    </table>`
+
+  return htmlBody;
+}
+
+const generateEmailHtmlRows = results => {
+  let bodyString = "";
+  for (let result of results) {
+    bodyString += 
+    `<tr style="background-color:#dee7e7ff;color:#2b2d42ff;font-size:16px;text-align:center;">
+      <td style="padding:4px;border:solid #2b2d42 1px;">${result.stock}</td>
+      <td style="padding:4px;border:solid #2b2d42 1px;">${result.year}</td>
+      <td style="padding:4px;border:solid #2b2d42 1px;">${result.make}</td>
+      <td style="padding:4px;border:solid #2b2d42 1px;">${result.model}</td>
+      <td style="padding:4px;border:solid #2b2d42 1px;">${result.trim}</td>
+      <td style="padding:4px;border:solid #2b2d42 1px;">${result.price}</td>
+      <td style="padding:4px;border:solid #2b2d42 1px;">${result.extColor}</td>
+      <td style="padding:4px;border:solid #2b2d42 1px;">${result.vin}</td>
+      <td style="padding:4px;border:solid #2b2d42 1px;"><a href=${result.link} target='_blank'>See More</a></td>
+    </tr>`;
+  }
+  return bodyString;
+}
 
 const getHashedPassword = password => {
   const sha256 = crypto.createHash("sha256");
