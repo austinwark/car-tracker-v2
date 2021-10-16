@@ -3,7 +3,8 @@ const nodemailer = require("nodemailer");
 
 module.exports = class Mailer {
 
-  constructor() {
+  constructor(onlyNew = false) {
+    this.onlyNew = onlyNew;
     this.transport = nodemailer.createTransport({
       service :"Gmail",
       auth: {
@@ -27,20 +28,38 @@ module.exports = class Mailer {
   }
 
   sendResultsEmail(email, query, results) {
-    const htmlBody = this.generateEmailHtml(results);
-    this.transport.sendMail({
-      from: process.env.MAILER_USER,
-      to: email,
-      subject: `Results are in from #${query.name}!`,
-      html: htmlBody
-    }).catch(err => console.log(err));;
+    return new Promise((resolve, reject) => {
+
+      if (this.onlyNew && results.every(result => !result.isNewResult)) {
+        resolve();
+        return;
+      }
+
+      const htmlBody = this.generateEmailHtml(results);
+      this.transport.sendMail({
+        from: process.env.MAILER_USER,
+        to: email,
+        subject: `Results are in from #${query.name}!`,
+        html: htmlBody
+      }, (err, info) => {
+        if (err || info.rejected.length > 0) {
+          reject();
+        } else {
+          console.log("Email sent successfully.");
+          resolve();
+        }
+      });
+    });
   }
 
   generateEmailHtml(results) {
+    let oldResults = results;
+    if (this.onlyNew) {
+      results = oldResults.filter(result => result.isNewResult);
+    }
     const numberOfResults = results.length;
-  
     let htmlBody = 
-    `<h1 style="font-size:22px;color:#2b2d42;">A total of ${numberOfResults} results were found that fit your query's parameters.</h1>
+    `<h1 style="font-size:22px;color:#2b2d42;">A total of ${numberOfResults} ${this.onlyNew ? "new " : ""}results were found that fit your query's parameters.</h1>
     <table style="border-collapse:collapse;">
       <tbody>
         <tr style="background-color:#2b2d42;color:#f4faff;font-size:18px">
@@ -52,6 +71,7 @@ module.exports = class Mailer {
           <th style="padding:4px;border:solid #2b2d42 1px;">Price</th>
           <th style="padding:4px;border:solid #2b2d42 1px;">Ext. Color</th>
           <th style="padding:4px;border:solid #2b2d42 1px;">Vin #</th>
+          <th style="padding:4px;border:solid #2b2d42 1px;">New Result</th>
           <th style="padding:4px;border:solid #2b2d42 1px;">Link</th>
         </tr>
         ${this.generateEmailHtmlRows(results)}
@@ -74,6 +94,7 @@ module.exports = class Mailer {
         <td style="padding:4px;border:solid #2b2d42 1px;">${result.price}</td>
         <td style="padding:4px;border:solid #2b2d42 1px;">${result.extColor}</td>
         <td style="padding:4px;border:solid #2b2d42 1px;">${result.vin}</td>
+        <td style="padding:4px;border:solid #2b2d42 1px;">${result.isNewResult ? "YES" : "NO"}</td>
         <td style="padding:4px;border:solid #2b2d42 1px;"><a href=${result.link} target='_blank'>See More</a></td>
       </tr>`;
     }

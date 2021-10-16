@@ -45,34 +45,73 @@ const scrapeResults = (user, queries) => {
   const { email, emailVerified } = user;
 
   for (let query of queries) {
-    const { queryId, autoUpdates } = query;
+    const { queryId, autoUpdates, onlyNew } = query;
 
     fetchResults(query).then(resultsList => {
       query.numberOfResults = resultsList.length;
-
+      // console.log(resultsList)
       const sqlQuery = mysql.format("REPLACE INTO queries (queryId, userId, name, autoUpdates, onlyNew, allDealerships, model, minPrice, maxPrice, minYear, maxYear, customerName, customerPhone, notes, numberOfResults, createdDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
           [...Object.values(query)]);
         
           connection.query(sqlQuery, err => {
             if (err) console.log(err);
-            const updatedResultsList = resultsList.map(result => {
-              const arr = Object.values(result);
-              if (!result.hasOwnProperty("queryId"))
-                arr.unshift(queryId);
-              return arr;
+            
+            setScrapedResultsViewed(queryId, resultsList).then(updatedResults => {
+              
+              if (updatedResults.length > 0 && autoUpdates && emailVerified) {
+                
+                const mailer = new Mailer(onlyNew);
+                mailer.sendResultsEmail(email, query, updatedResults).then(() => {
+                  saveResults(queryId, true, updatedResults);
+                }).catch(err => {
+                  saveResults(queryId, false, updatedResults);
+                });
+              }
             });
-
-            saveResults(queryId, updatedResultsList);
-            if (autoUpdates && emailVerified) {
-              const mailer = new Mailer();
-              mailer.sendResultsEmail(email, query, resultsList);
-            }
           });
     });
   }
 }
 
-const saveResults = (queryId, resultsList) => {
+const setScrapedResultsViewed = (queryId, scrapedResults) => {
+  return new Promise((resolve, reject) => {
+
+    const sqlQuery = mysql.format("SELECT * FROM results WHERE queryId = ?",
+      [queryId]);
+    connection.query(sqlQuery, (err, currentResults) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+
+      
+      for (let scrapedResult of scrapedResults) {
+        let isNewResult = true;
+        for (let currentResult of currentResults) {
+
+          if (currentResult.vin === scrapedResult.vin) {
+            isNewResult = currentResult.isNewResult;
+          }
+        }
+        scrapedResult.isNewResult = isNewResult;
+      }
+      resolve(scrapedResults);
+      return;
+    });
+  });
+}
+
+const saveResults = (queryId, setResultsViewed, resultsObj) => {
+  if (setResultsViewed) {
+    for (let result of resultsObj)
+      result.isNewResult = false;
+  }
+  let resultsList = resultsObj.map(result => {
+    const arr = Object.values(result);
+    if (!result.hasOwnProperty("queryId"))
+      arr.unshift(queryId);
+    return arr;
+  });
   return new Promise((resolve, reject) => {
     if (resultsList.length < 1) {
       const sqlQuery = mysql.format("DELETE FROM results WHERE queryId = ?",
@@ -81,20 +120,24 @@ const saveResults = (queryId, resultsList) => {
           if (err) {
             console.log(err);
             reject(err);
+            return;
           } else {
             resolve();
+            return;
           }
         });
     }
-
-    const sqlQuery = mysql.format("REPLACE INTO results (queryId, stock, make, model, year, trim, extColor, price, vin, intColor, transmission, engine, miles, dealer, link, carfaxLink, imageLink) VALUES ?",
+    
+    const sqlQuery = mysql.format("REPLACE INTO results (queryId, stock, make, model, year, trim, extColor, price, vin, intColor, transmission, engine, miles, dealer, link, carfaxLink, imageLink, isNewResult) VALUES ?",
       [resultsList]);
     connection.query(sqlQuery, (err, results) => {
       if (err) {
         console.log(err);
         reject(err);
+        return;
       } else {
         resolve();
+        return;
       }
     })
   })
