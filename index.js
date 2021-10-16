@@ -441,10 +441,14 @@ function saveResults(resultsList) {
   });
 }
 
-app.get("/api/results/:queryId", authMiddleware, (req, res) => {
+app.get("/api/results/:queryId/:sortBy/:sortOrder", authMiddleware, (req, res) => {
     const queryId = req.params.queryId;
+    const sortBy = req.params.sortBy.toLowerCase();
+    const sortOrder = req.params.sortOrder.toUpperCase();
+    console.log("SORT BY " + sortBy + " SORT ORDER " + sortOrder);
 
-    const sqlQuery = `SELECT * FROM results WHERE queryId = ${queryId}`;
+    const sqlQuery = `SELECT * FROM results WHERE queryId = ${queryId} ORDER BY ${sortBy} ${sortOrder}`;
+    console.log(sqlQuery)
     connection.query(sqlQuery, function(err, results) {
         if (err) {
             console.error(err);

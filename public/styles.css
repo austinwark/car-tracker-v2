@@ -179,6 +179,23 @@ main #results-panel #table-container #results-table {
 main #results-panel #table-container #results-table th {
   border-bottom-color: #dee2e6;
 }
+main #results-panel #table-container #results-table .sort-button {
+  font-size: 1rem;
+  font-weight: 700;
+}
+main #results-panel #table-container #results-table .sort-button .bi-arrow-down-short::before {
+  transform: scale(1.5);
+  opacity: 0.4;
+}
+main #results-panel #table-container #results-table .sort-button.asc .bi-arrow-down-short::before {
+  transform: rotate(180deg) scale(1.5);
+}
+main #results-panel #table-container #results-table .sort-button.active {
+  font-weight: 800;
+}
+main #results-panel #table-container #results-table .sort-button.active .bi-arrow-down-short::before {
+  opacity: 1;
+}
 main #results-panel #table-container #results-table td {
   padding: 12px 6px;
 }
