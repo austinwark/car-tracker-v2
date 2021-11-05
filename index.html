@@ -325,9 +325,9 @@
           <form id="create-form" class="row create-form">
             <h5>Query Details</h5>
             <div class="col-12 my-1">
-              <label for="create-input-name" class="form-label">Query Name</label>
+              <label for="create-input-name" class="form-label">Query Name*</label>
               <input name="query-name" type="text" class="form-control form-control-sm" id="create-input-name"
-                placeholder="Tacoma for Bob" value="Testing " required />
+                required />
             </div>
             <div class="col-12 my-1">
               <div class="form-check form-switch">
@@ -337,21 +337,20 @@
             </div>
             <div class="col-12 my-1">
               <div class="form-check form-switch">
-                <input name="only-new" class="form-check-input" type="checkbox" id="create-switch-new" value="true" />
+                <input name="only-new" class="form-check-input" type="checkbox" id="create-switch-new" />
                 <label class="form-check-label" for="create-switch-new">Send only new results</label>
               </div>
             </div>
             <div class="col-12 my-1">
               <div class="form-check form-switch">
-                <input name="all-dealers" class="form-check-input" type="checkbox" id="create-switch-dealers"
-                  value="true" />
+                <input name="all-dealers" class="form-check-input" type="checkbox" id="create-switch-dealers" />
                 <label class="form-check-label" for="create-switch-dealers">Search all dealerships</label>
               </div>
             </div>
             <hr class="my-2" />
             <h5>Vehicle Details</h5>
             <div class="col-12 my-1">
-              <label for="create-select-model" class="form-label">Model</label>
+              <label for="create-select-model" class="form-label">Model*</label>
               <select name="model" id="create-select-model" class="form-select form-select-sm" required>
                 <option value="Avalon">Avalon</option>
                 <option value="Camry">Camry</option>
@@ -367,24 +366,24 @@
               </select>
             </div>
             <div class="col-6 my-1">
-              <label for="create-input-min-price" class="form-label">Min Price</label>
+              <label for="create-input-min-price" class="form-label">Min Price*</label>
               <input name="min-price" class="form-control form-control-sm" id="create-input-min-price" type="number"
-                step="100" min="0" max="100000" value="0" required />
+                step="100" min="0" max="100000" required />
             </div>
             <div class="col-6 my-1">
-              <label for="create-input-max-price" class="form-label">Max Price</label>
+              <label for="create-input-max-price" class="form-label">Max Price*</label>
               <input name="max-price" class="form-control form-control-sm" id="create-input-max-price" type="number"
-                step="100" min="0" max="100000" value="40000" required />
+                step="100" min="0" max="100000" required />
             </div>
             <div class="col-6 my-1">
-              <label for="create-input-min-year" class="form-label">Min Year</label>
+              <label for="create-input-min-year" class="form-label">Min Year*</label>
               <input name="min-year" class="form-control form-control-sm" id="create-input-min-year" type="number"
-                step="1" min="1990" max="2022" value="2000" required />
+                step="1" min="1990" max="2022" required />
             </div>
             <div class="col-6 my-1">
-              <label for="create-input-max-year" class="form-label">Max Year</label>
+              <label for="create-input-max-year" class="form-label">Max Year*</label>
               <input name="max-year" class="form-control form-control-sm" id="create-input-max-year" type="number"
-                step="1" min="2000" value="2022" required />
+                step="1" min="2000" required />
             </div>
             <hr class="my-2" />
             <h5>Customer Details</h5>
