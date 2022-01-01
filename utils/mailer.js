@@ -15,7 +15,6 @@ module.exports = class Mailer {
   }
 
   sendConfirmationEmail(email, confirmationCode) {
-    
     this.transport.sendMail({
       from: process.env.MAILER_USER,
       to: email,

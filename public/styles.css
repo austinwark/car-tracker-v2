@@ -303,11 +303,15 @@ body .login-container .login-append-message a {
   #meta-panel {
     position: absolute;
     right: 100%;
-    top: 56px;
   }
 
   .panel-active-lg {
     right: 0 !important;
+  }
+}
+@media (max-width: 991px) and (min-width: 768px) {
+  #meta-panel {
+    top: 56px;
   }
 }
 @media (max-width: 767px) {
