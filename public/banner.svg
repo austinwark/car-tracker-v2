@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="27.975674mm"
+   height="4.8197336mm"
+   viewBox="0 0 27.975674 4.8197337"
+   version="1.1"
+   id="svg8"
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
+   sodipodi:docname="banner.svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="8"
+     inkscape:cx="35.487208"
+     inkscape:cy="-8.1998538"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="1912"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     objecttolerance="2"
+     gridtolerance="2">
+    <inkscape:grid
+       type="xygrid"
+       id="grid4541"
+       originx="-67.377496"
+       originy="-170.26568" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-67.377497,-121.91459)">
+    <g
+       style="fill:#f4faff;fill-opacity:1"
+       id="g4539"
+       transform="matrix(0.26329147,0,0,0.26354969,67.377732,121.9141)">
+      <path
+         id="path4528"
+         d="m 11.742,10.344 a 6.5,6.5 0 1 0 -1.397,1.398 h -0.001 c 0.03,0.04 0.062,0.078 0.098,0.115 l 3.85,3.85 a 1.0002026,1.0002026 0 0 0 1.415,-1.414 l -3.85,-3.85 a 1.007,1.007 0 0 0 -0.115,-0.1 z M 12,6.5 a 5.5,5.5 0 1 1 -11,0 5.5,5.5 0 0 1 11,0 z"
+         inkscape:connector-curvature="0"
+         style="fill:#f4faff;fill-opacity:1" />
+    </g>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93888903px;line-height:1.25;font-family:Oxygen;-inkscape-font-specification:'Oxygen, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#f4faff;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="71.275734"
+       y="125.78606"
+       id="text4545"><tspan
+         sodipodi:role="line"
+         id="tspan4543"
+         x="71.275734"
+         y="125.78606"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333311px;font-family:Oxygen;-inkscape-font-specification:'Oxygen, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#f4faff;fill-opacity:1;stroke-width:0.26458332">Tracker Appr</tspan></text>
+    <rect
+       style="opacity:1;fill:#ffffff;fill-opacity:1;stroke:#f4faff;stroke-width:0.40621412;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect845"
+       width="23.914894"
+       height="0.014833631"
+       x="71.235168"
+       y="-125.94228"
+       ry="0"
+       rx="0"
+       transform="scale(1,-1)" />
+  </g>
+</svg>

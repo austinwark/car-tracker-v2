@@ -116,7 +116,6 @@ module.exports = class Scraper {
             
             try {
                 const response = await axios.get(siteUrl);
-                console.log(siteUrl);
                 counter++;
                 if (response.status >= 200 && response.status <= 299) {
 
@@ -126,39 +125,10 @@ module.exports = class Scraper {
             } catch (error) {
                 console.log(error.response.status);
                 continueGettingWebpages = false;
-            }
-            
-            // axios.get(siteUrl).then(response => {
-            //     console.log("WHAT")
-            //         console.log(response.status);
-            //         counter++;
-            //     }).catch(error => {
-            //         continueGettingWebpages = false;
-            //     });            
+            }        
         }
 
         return this.totalResults;
-
-        // try {
-        //     axios.get("https://www.liatoyotaofcolonie.com/searchused.aspx?Make=Toyota&Model=Corolla&pt=1")
-        //     .then(response => {
-
-        //         console.log(response.status)
-        //     }).catch(error => {
-        //         if (error.response) {
-        //             // Request was made and the server responded with a status code not in 200s range
-        //             console.log(error.response.status)
-        //         } else if (error.request) {
-        //             // Request was made but no response was received
-        //             console.log(error.request);
-        //         } else {
-        //             // Something else
-        //         }
-        //     })
-            
-        // } catch (error) {
-        //     console.log(error);
-        // }
     }
 
 

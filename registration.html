@@ -15,6 +15,15 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/overlayscrollbars/1.13.1/css/OverlayScrollbars.css"
       integrity="sha512-Ho1L8FTfzcVPAlvfkL1BV/Lmy1JDUVAP82/LkhmKbRX5PnQ7CNDHAUp2GZe7ybBpovS+ssJDf+SlBOswrpFr8g=="
       crossorigin="anonymous" referrerpolicy="no-referrer" />
+      <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#00aba9">
+    <meta name="theme-color" content="#ffffff">
     <link rel="stylesheet" href="/styles.css" type="text/css" />
   </head>
   <body>
@@ -24,17 +33,17 @@
         <div class="input-group my-3">
           <!-- <label for="register-input-email" class="form-label">Email</label> -->
           <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-          <input name="email" type="email" placeholder="Email Address" class="form-control form-control-sm" id="register-input-email" value="test@test.com" />
+          <input name="email" type="email" placeholder="Email Address" class="form-control form-control-sm" id="register-input-email" />
         </div>
         <div class="input-group my-3">
           <!-- <label for="register-input-password" class="form-label">Password</label> -->
           <span class="input-group-text"><i class="bi bi-key"></i></span>
-          <input name="password" type="password" placeholder="Password" class="form-control form-control-sm" id="register-input-password" value="password" />
+          <input name="password" type="password" placeholder="Password" class="form-control form-control-sm" id="register-input-password" />
         </div>
         <div class="input-group my-3">
           <!-- <label for="register-input-confirm" class="form-label">Confirm Password</label> -->
           <span class="input-group-text"><i class="bi bi-arrow-clockwise"></i></span>
-          <input name="confirmPassword" type="password" placeholder="Confirm Password" class="form-control form-control-sm" id="register-input-confirm" value="password" />
+          <input name="confirmPassword" type="password" placeholder="Confirm Password" class="form-control form-control-sm" id="register-input-confirm" />
         </div>
           <div class="alert alert-danger text-center" role="alert">
             
@@ -42,7 +51,7 @@
           <div class="alert alert-success text-center" role="alert">
 
           </div>
-        <button type="button" class="btn btn-primary" id="form-submit-button"><i class="bi bi-cloud-arrow-up" id="submit-icon"></i> Submit</button>
+        <button type="button" class="btn btn-primary" id="submit-button"><i class="bi bi-cloud-arrow-up" id="submit-icon"></i> Submit</button>
       </form>
       <div class="registration-append-message p-3 my-3 mx-auto text-center">
         <p class="m-0">Already a user? <a href="/login">Login here</a>.</p>
@@ -71,7 +80,13 @@
             }
           }
 
-          $("#form-submit-button").on("click", event => {
+          $("#registration-form").on("keypress", event => {
+            if (event.which === 13) {
+              $("#submit-button").click();
+            }
+          })
+
+          $("#submit-button").on("click", event => {
             const formData = convertFormToJson($("#registration-form"));
             const { email, password, confirmPassword } = formData;
 
@@ -84,13 +99,14 @@
             }
 
             getAllUsers().then(users => {
-              console.log(users);
               if (users.find(user => user.email === email)) {
                 showDangerAlert("Email already in use.");
               } else {
                 hideAlerts();
                 $("#registration-form").submit();
               }
+            }).catch(err => {
+              console.log(err)
             }); 
           });
           
