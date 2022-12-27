@@ -6,7 +6,7 @@ const session = require("express-session");
 const { authMiddleware, validateAuthFormData, getAllUsersController, getActiveUser,
   changePassword, logout, login, confirmEmail,
   resendEmailConfirmation, registration, unsubscribeUserEmail } = require("./controllers/authController");
-const { getAllQueries, getSingleQuery, deleteSingleQuery, refreshResults, saveNewQuery, getSortedResults, emailResults  } = require("./controllers/mainController");
+const { getAllQueries, getSingleQuery, deleteSingleQuery, refreshResults, saveNewQuery, getSortedResults, emailResults, emailSingleResult  } = require("./controllers/mainController");
 
 const app = express();
 app.use(express.json());
@@ -100,6 +100,8 @@ app.post("/api/queries/submit", authMiddleware, saveNewQuery);
 app.get("/api/results/:queryId/:sortBy/:sortOrder", authMiddleware, getSortedResults);
 
 app.post("/api/results/email", emailResults);
+
+app.post("/api/results/email/single", emailSingleResult);
 
 /* --- END Homepage --- */
 

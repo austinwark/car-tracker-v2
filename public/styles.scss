@@ -36,6 +36,9 @@
 .btn-danger:hover {
   background-color: #A30000AA !important;
 }
+.btn.disabled, .btn:disabled {
+  opacity: .45 !important;
+}
 .badge-secondary {
   background-color: #0090C1AA !important;
   color: var(--secondary-text-color) !important;

@@ -836,6 +836,21 @@
           <div class="modal-footer">
             <button
               type="button"
+              class="btn btn-secondary"
+              id="email-single-result-button"
+            >
+              <span id="email-single-loader">
+                <span
+                  class="spinner-grow spinner-grow-sm"
+                  role="status"
+                  aria-hidden="true"
+                ></span>
+                <span class="visually-hidden">Loading...</span>
+              </span>
+              <i class="bi bi-envelope"></i> Send to email
+            </button>
+            <button
+              type="button"
               class="btn btn-primary"
               data-bs-dismiss="modal"
             >
@@ -939,42 +954,42 @@
     ></script>
     <script>
       $("document").ready(() => {
+
         // Looks for a flag in URL parameters and displays toast message depending on the flag
         const searchParams = new URLSearchParams(window.location.search);
         if (searchParams.has("auth")) {
           const authParam = searchParams.get("auth");
           if (authParam === "err") {
-            showToast(
-              "Oops!",
-              "An error was encountered changing your password."
-            );
+            showToast("Oops!", "An error was encountered changing your password.");
           } else if (authParam === "success") {
             showToast("Success!", "Password changed successfully!");
           }
         }
 
-        refreshQueriesAndResults();
-
         // Hide loaders and alerts
         $("#submit-loader").hide();
         $("#refresh-loader").hide();
         $("#email-loader").hide();
+        $("#email-single-loader").hide();
         $(".alert").hide();
 
         // Set max of maxYear input in create form dynamically
         const nextModelYear = new Date().getFullYear() + 1;
         $("#create-input-max-year").prop("max", nextModelYear);
 
-        // Show user's email
+        // Fetch signed in user data
         getActiveUser().then((user) => {
-          $("#user-email").html(user.email);
+          $("#user-email").html(user.email); // show email address
+          
           const isEmailVerified = user.emailVerified;
+          localStorage.setItem("email_ver", isEmailVerified ? 1 : 0);
+
           $("#email-results-button").prop("disabled", !isEmailVerified);
           $("#email-verified")
-            .html(
-              isEmailVerified ? "Email is verified" : "Resend verification link"
-            )
+            .html(isEmailVerified ? "Email is verified" : "Resend verification link")
             .prop("disabled", isEmailVerified);
+
+          refreshQueriesAndResults(); // checks for queries & fetches results once user is loaded
         });
 
         $(".offcanvas-body").overlayScrollbars({
@@ -1175,7 +1190,7 @@
         const numberOfResults = results.length;
         return results.map((result, i) => {
           const slideHtml = `
-            <div class="carousel-item ${result.vin == activeVin && "active"}">
+            <div class="carousel-item ${result.vin == activeVin && "active"}" data-vin="${result.vin}">
               <div class="m-auto d-flex justify-content-center">
                 <span id="carousel-item-counter"><strong>${
                   i + 1
@@ -1287,6 +1302,7 @@
         const $desiredListItem = listItem.first();
         const index = $(".query-list-item").index(`[data-id=${queryId}]`);
 
+        $queriesList.off("click"); // reset events
         $queriesList.on("click", "li", (event) => {
           const queryId = $(event.currentTarget).data("id");
           setActiveQuery(queryId);
@@ -1341,6 +1357,10 @@
         $(".queries-list").children().removeClass("query-selected");
         $(`[data-id=${queryId}]`).addClass("query-selected");
 
+        const emailVerified = getEmailVerified();
+        console.log(emailVerified);
+        $("#email-results-button, #email-single-result-button").prop("disabled", !emailVerified);
+
         // A workaround used to trigger an action if screen size is mobile-sized
         // (The bottom nav will have a display of 'flex' if screen width is < 576px)
         const bottomNavDisplayVal = $("#mobile-bottom-nav").css("display");
@@ -1351,11 +1371,7 @@
       };
 
       /* Takes a query id and calls ajax GET method to fetch the query's results. Returns a Promise */
-      const getQueryResults = (
-        queryId,
-        sortBy = "year",
-        sortOrder = "desc"
-      ) => {
+      const getQueryResults = (queryId, sortBy = "year", sortOrder = "desc") => {
         return $.ajax({
           type: "GET",
           url: `api/results/${queryId}/${sortBy}/${sortOrder}`,
@@ -1377,7 +1393,7 @@
           // Clear all results and hide no results message
           $(".results-row").remove();
           $("#no-results-msg").hide();
-          $("#email-results-button").prop("disabled", false);
+          // $("#email-results-button").prop("disabled", false);
           // Loop through results and display each row to HTML page
           for (let i = 0; i < results.length; i++) {
             const result = results[i];
@@ -1478,6 +1494,10 @@
         }
         return dataObject;
       };
+
+      const getEmailVerified = function() {
+        return localStorage.getItem("email_ver") ? Number(localStorage.getItem("email_ver")) : 0;
+      }
     </script>
     <script type="text/javascript" src="/event-handlers.js"></script>
   </body>

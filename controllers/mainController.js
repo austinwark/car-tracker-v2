@@ -4,7 +4,7 @@ const session = require("express-session");
 const Mailer = require("../utils/mailer.js");
 
 const { getAllUsers, getHashedPassword, saveNewUser, fetchResults, 
-  saveResults, resetEmailConfirmation, parseJson, isJson } = require("../utils/serverHelperFunctions");
+  saveResults, resetEmailConfirmation, parseJson, isJson, findUserByEmail } = require("../utils/serverHelperFunctions");
 
 const connection = mysql.createConnection({
   host: process.env.DB_HOST,
@@ -166,11 +166,9 @@ exports.emailResults = async (req, res) => {
   const { queryId } = results[0];
   const email = req.session.email;
 
-  // Get all users
-  const allUsers = await getAllUsers();
-  // Find the signed in user for the emailConfirmationCode
-  const user = allUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
-  if (!user) {
+  // Get user & make sure email is verified
+  const user = await findUserByEmail(email);
+  if (!user || !user.emailVerified) {
     res.status(401).send();
     return;
   }
@@ -186,8 +184,42 @@ exports.emailResults = async (req, res) => {
 
     const query = queryResults[0];
     const mailer = new Mailer();
-    mailer.sendResultsEmail(email, query, results, user.emailConfirmationCode);
-    res.status(200).send();
+    mailer.sendResultsEmail(email, query, results, user.emailConfirmationCode).then(() => {
+      res.status(200).send();
+    }).catch(() => {
+      res.status(400).send();
+    });
+  });
+}
+
+exports.emailSingleResult = async (req, res) => {
+
+  const { queryId, vin } = req.body;
+  const email = req.session.email;
+
+  // Make sure user's email is verified
+  const user = await findUserByEmail(email);
+  if (!user || !user.emailVerified) {
+    res.status(401).send();
+    return;
+  }
+
+  const sqlQuery = mysql.format("SELECT * FROM results WHERE queryId = ? AND vin = ?",
+    [queryId, vin]);
+  connection.query(sqlQuery, (err, queryResults) => {
+    if (err) {
+      console.log(err);
+      res.status(400).send(err);
+      return;
+    }
+
+    const result = queryResults[0];
+    const mailer = new Mailer();
+    mailer.sendSingleResultEmail(email, result).then(() => {
+      res.status(200).send();
+    }).catch(() => {
+      res.status(400).send();
+    });
   });
 }
 

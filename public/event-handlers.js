@@ -1,4 +1,8 @@
 $(document).ready(() => {
+  const getEmailVerified = function() {
+    return localStorage.getItem("email_ver") ? Number(localStorage.getItem("email_ver")) : 0;
+  }
+
   /* Bottom Nav Home button in mobile view */
   $("#mobile-home-button").on("click", (event) => {
     $(".panel").removeClass("panel-active");
@@ -44,8 +48,15 @@ $(document).ready(() => {
 
   /*  Send results to email button click handler */
   $("#email-results-button").on("click", () => {
+    const emailVerified = getEmailVerified();
+    if (!emailVerified) {
+      showToast("Oops!", "Your email needs to be verified before sending any results");
+      return;
+    }
+
     const $emailLoader = $("#email-loader");
     $emailLoader.show();
+
     const queryId = $(".query-list-item.query-selected").data("id");
     getQueryResults(queryId).then((queryResults) => {
       const resultsData = convertResultsToJson(queryResults.results);
@@ -56,18 +67,51 @@ $(document).ready(() => {
         data: { results: queryResults.results },
         content: "application/json;charset=UTF-8",
         success: () => {
-          $emailLoader.hide();
           showToast("Success!", "Results sent to your email address.");
         },
         error: (err) => {
           console.log(err);
-          $emailLoader.hide();
-          showToast(
-            "Oops!",
-            "An error was encountered when sending results to your email address."
-          );
+          showToast("Oops!", "An error was encountered when sending results to your email address.");
+        },
+        complete: () => {
+          $emailLoader.hide(); // hide loading animation on complete
         }
       });
+    });
+  });
+
+  /* Click handler for sending single result to email */
+  $("#email-single-result-button").on("click", () => {
+    const emailVerified = getEmailVerified();
+    if (!emailVerified) {
+      showToast("Oops!", "Your email needs to be verified before sending any results");
+      return;
+    }
+
+    const $loader = $("#email-single-loader");
+    $loader.show(); 
+
+    const queryId = $(".query-list-item.query-selected").data("id");
+    const vin = $(".carousel-item.active").data("vin");
+
+    $.ajax({
+      type: "POST",
+      url: "api/results/email/single",
+      data: { queryId, vin },
+      content: "application/json;charset=UTF-8",
+      success: () => {
+        showToast("Success!", "The result was sent to your email address.");
+      },
+      error: (err) => {
+        console.log(err);
+        showToast(
+          "Oops!",
+          "An error was encountered when sending the result to your email address."
+        );
+      },
+      complete: () => {
+        $loader.hide(); // hide loading animation on complete
+      }
     });
   });
 
