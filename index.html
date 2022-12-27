@@ -135,12 +135,6 @@
                   ></span>
                   <span class="visually-hidden">Loading...</span>
                 </span>
-<<<<<<< HEAD
-                <i class="bi bi-arrow-repeat" id="refresh-icon"></i> Refresh</button>
-                <button type="button" id="mobile-settings-md-button" class="btn btn-sm btn-info d-none d-md-inline-block d-lg-none">
-                  <i class="bi bi-gear" id="refresh-icon"></i> Settings
-                </button>
-=======
                 <i class="bi bi-arrow-repeat" id="refresh-icon"></i> Refresh
               </button>
               <button
@@ -150,7 +144,6 @@
               >
                 <i class="bi bi-gear" id="refresh-icon"></i> Settings
               </button>
->>>>>>> develop
             </div>
           </div>
           <div id="table-container">
@@ -505,11 +498,6 @@
           <form id="create-form" class="row create-form">
             <h5>Query Details</h5>
             <div class="col-12 my-1">
-<<<<<<< HEAD
-              <label for="create-input-name" class="form-label">Query Name*</label>
-              <input name="query-name" type="text" class="form-control form-control-sm" id="create-input-name"
-                required />
-=======
               <label for="create-input-name" class="form-label"
                 >Query Name</label
               >
@@ -521,7 +509,6 @@
                 placeholder="Tacoma for Bob"
                 required
               />
->>>>>>> develop
             </div>
             <div class="col-12 my-1">
               <div class="form-check form-switch">
@@ -539,10 +526,6 @@
             </div>
             <div class="col-12 my-1">
               <div class="form-check form-switch">
-<<<<<<< HEAD
-                <input name="only-new" class="form-check-input" type="checkbox" id="create-switch-new" />
-                <label class="form-check-label" for="create-switch-new">Send only new results</label>
-=======
                 <input
                   name="only-new"
                   class="form-check-input"
@@ -553,15 +536,10 @@
                 <label class="form-check-label" for="create-switch-new"
                   >Send only new results</label
                 >
->>>>>>> develop
               </div>
             </div>
             <div class="col-12 my-1">
               <div class="form-check form-switch">
-<<<<<<< HEAD
-                <input name="all-dealers" class="form-check-input" type="checkbox" id="create-switch-dealers" />
-                <label class="form-check-label" for="create-switch-dealers">Search all dealerships</label>
-=======
                 <input
                   name="all-dealers"
                   class="form-check-input"
@@ -572,16 +550,11 @@
                 <label class="form-check-label" for="create-switch-dealers"
                   >Search all dealerships</label
                 >
->>>>>>> develop
               </div>
             </div>
             <hr class="my-2" />
             <h5>Vehicle Details</h5>
             <div class="col-12 my-1">
-<<<<<<< HEAD
-              <label for="create-select-model" class="form-label">Model*</label>
-              <select name="model" id="create-select-model" class="form-select form-select-sm" required>
-=======
               <label for="create-select-model" class="form-label">Model</label>
               <select
                 name="model"
@@ -590,7 +563,6 @@
                 required
               >
                 <option value=""></option>
->>>>>>> develop
                 <option value="Avalon">Avalon</option>
                 <option value="Camry">Camry</option>
                 <option value="Corolla">Corolla</option>
@@ -605,26 +577,6 @@
               </select>
             </div>
             <div class="col-6 my-1">
-<<<<<<< HEAD
-              <label for="create-input-min-price" class="form-label">Min Price*</label>
-              <input name="min-price" class="form-control form-control-sm" id="create-input-min-price" type="number"
-                step="100" min="0" max="100000" required />
-            </div>
-            <div class="col-6 my-1">
-              <label for="create-input-max-price" class="form-label">Max Price*</label>
-              <input name="max-price" class="form-control form-control-sm" id="create-input-max-price" type="number"
-                step="100" min="0" max="100000" required />
-            </div>
-            <div class="col-6 my-1">
-              <label for="create-input-min-year" class="form-label">Min Year*</label>
-              <input name="min-year" class="form-control form-control-sm" id="create-input-min-year" type="number"
-                step="1" min="1990" max="2022" required />
-            </div>
-            <div class="col-6 my-1">
-              <label for="create-input-max-year" class="form-label">Max Year*</label>
-              <input name="max-year" class="form-control form-control-sm" id="create-input-max-year" type="number"
-                step="1" min="2000" required />
-=======
               <label for="create-input-min-price" class="form-label"
                 >Min Price</label
               >
@@ -682,7 +634,6 @@
                 min="2000"
                 required
               />
->>>>>>> develop
             </div>
             <hr class="my-2" />
             <h5>Customer Details</h5>
@@ -996,173 +947,7 @@
           resize: "vertical",
         });
         $("#results-panel").overlayScrollbars({
-<<<<<<< HEAD
-          resize: "vertical"
-        })
-        $("#mobile-results-button").on("click", event => {
-          $(".panel").removeClass("panel-active");
-          $("#results-panel").addClass("panel-active");
-          $("#mobile-bottom-nav button").removeClass("nav-active");
-          $(event.currentTarget).addClass("nav-active");
-        });
-        $("#mobile-home-button").on("click", event => {
-          $(".panel").removeClass("panel-active");
-          $("#side-panel").addClass("panel-active");
-          $("#mobile-bottom-nav button").removeClass("nav-active");
-          $(event.currentTarget).addClass("nav-active");
-        });
-        $("#mobile-settings-button").on("click", event => {
-          $(".panel").removeClass("panel-active");
-          $("#meta-panel").addClass("panel-active");
-          $("#mobile-bottom-nav button").removeClass("nav-active");
-          $(event.currentTarget).addClass("nav-active");
-        });
-        $("#mobile-settings-md-button").on("click", event => {
-          const buttonDisplay = $(event.currentTarget).css("display");
-          // Safe check to ensure button is not clicked when not on screen
-          if (buttonDisplay !== "inline-block")
-            return;
-
-          $("#meta-panel").toggleClass("panel-active-lg");
-        });
-
-        // Focuses first input in form
-        $("#create-offcanvas-button").on("click", () => {
-          $("input[name=query-name]").focus();
-        });
-
-        $("#email-verified").on("click", () => {
-          $.ajax({
-            type: "GET",
-            url: "api/users/resend-verification",
-            success: () => {
-              showToast("Success!", "Email verification link sent.");
-            },
-            error: () => {
-              showToast("Oops!", "Error sending verification link.");
-            }
-          })
-        });
-
-        $("#email-results-button").on("click", () => {
-          const $emailLoader = $("#email-loader");
-          $emailLoader.show();
-          const queryId = $(".query-list-item.query-selected").data("id");
-          getQueryResults(queryId).then(queryResults => {
-            const resultsData = convertResultsToJson(queryResults.results);
-            const obj = { results: resultsData }
-            $.ajax({
-              type: "POST",
-              url: "api/results/email",
-              data: { results: queryResults.results},
-              content: "application/json;charset=UTF-8",
-              success: () => {
-                $emailLoader.hide();
-                showToast("Success!", "Results sent to your email address.");
-              },
-              error: err => {
-                console.log(err);
-                $emailLoader.hide();
-                showToast("Oops!", "An error was encountered when sending results to your email address.");
-              }
-            });
-          });
-        });
-
-        // Fetches and displays query name in delete confirmation modal
-        $("#settings-delete-button").on("click", () => {
-          const selectedQueryId = $(".queries-list").find("li.query-selected").data("id");
-
-          getSingleQuery(selectedQueryId).then(query => {
-            const $modalBodyText = $("#delete-confirmation-modal .modal-body span");
-            $modalBodyText.text("").append(` #${query.name}?`);
-          });
-        });
-
-        $("#query-delete-confirmation-button").on("click", () => {
-          const selectedQueryId = $(".queries-list").find("li.query-selected").data("id");
-
-          deleteSingleQuery(selectedQueryId).then(() => {
-            $("#delete-confirmation-modal").modal("hide")
-            // $("body").removeClass("modal-open").removeProp("style");
-            showToast("Success!", "Query deleted successfully!");
-            refreshQueriesAndResults();
-          });
-        });
-
-        $("#create-form").submit(event => {
-          $("#submit-icon").hide();
-          $("#submit-loader").show();
-
-          const formData = convertFormToJson($("#create-form"));
-          $.ajax({
-            type: "POST",
-            url: "api/queries/submit",
-            data: JSON.stringify(formData),
-            contentType: "application/json;charset=UTF-8",
-            success: function (data) {
-              let { queryId } = data;
-              clearFormData();
-              $("#submit-icon").show();
-              $("#submit-loader").hide();
-              refreshQueriesAndResults(queryId);
-              $(".offcanvas").removeClass("show");
-              showToast("Success!", "Query created successfully!");
-            },
-            error: function (request, status, error) {
-              console.error(error);
-            }
-          });
-
-          event.preventDefault();
-        });
-
-        $("#results-refresh-button").on("click", () => {
-          const activeQueryId = $(".query-list-item.query-selected").data("id");
-          $("#refresh-icon").hide();
-          $("#refresh-loader").show();
-          $.ajax({
-            type: "GET",
-            url: `api/results/refresh/${activeQueryId}`,
-            success: response => {
-              $("#refresh-icon").show();
-              $("#refresh-loader").hide();
-              showToast("Success!", "Results refreshed successfully!");
-              refreshQueriesAndResults(activeQueryId);
-            }
-          });
-        });
-
-        $("#result-details-modal").on("show.bs.modal", event => {
-          const $button = $(event.relatedTarget);
-          const queryId = $button.data("query-id");
-          const activeVin = $button.data("vin");
-          const $carouselInner = $("#result-details-carousel .carousel-inner");
-          $carouselInner.children().remove(); // clear modal
-          getQueryResults(queryId).then(results => {
-            const slideArray = displayCarouselSlides(results.results, activeVin);
-            for (let i = 0; i < slideArray.length; i++) {
-              $carouselInner.append(slideArray[i]);
-            }
-          });
-        });
-
-        $("#form-submit-button").on("click", () => {
-          $(".alert").hide(); // Hide any shown alerts
-          const formData = convertFormToJson($("#change-password-form"));
-          const { password, confirmPassword } = formData;
-          if (password.length == 0 || confirmPassword.length == 0) {
-            $(".alert-danger").html("All fields are required.").show();
-            return;
-          } else if (password !== confirmPassword) {
-            $(".alert-danger").html("Passwords must match.").show();
-            return;
-          }
-
-          $("#change-password-form").submit();
-=======
           resize: "vertical",
->>>>>>> develop
         });
       });
 
