@@ -6,7 +6,9 @@ module.exports = class Mailer {
   constructor(onlyNew = false) {
     this.onlyNew = onlyNew;
     this.transport = nodemailer.createTransport({
-      service :"Gmail",
+      host: "smtp.zoho.com",
+      secure: true,
+      port: 465,
       auth: {
         user: process.env.MAILER_USER,
         pass: process.env.MAILER_PASSWORD
@@ -43,7 +45,7 @@ module.exports = class Mailer {
           hour: "numeric",
           minute: "numeric" }
       );
-      const htmlBody = this.generateEmailHtml(results, confirmationCode);
+      const htmlBody = this.generateResultsEmailHtml(results, confirmationCode);
       
       this.transport.sendMail({
         from: process.env.MAILER_USER,
@@ -51,7 +53,11 @@ module.exports = class Mailer {
         subject: `Results are in from #${query.name}! [${currentDateTime}]`,
         html: htmlBody
       }, (err, info) => {
-        if (err || info.rejected.length > 0) {
+        if (err) {
+          console.error("An error occurred in Mailer.sendResultsEmail: " + err);
+          reject();
+        } else if (info && info.rejected && info.rejected.length) {
+          console.log("An email address was rejected in Mailer.sendResultsEmail: " + email);
           reject();
         } else {
           console.log("Email sent successfully.");
@@ -61,7 +67,34 @@ module.exports = class Mailer {
     });
   }
 
-  generateEmailHtml(results, confirmationCode) {
+  sendSingleResultEmail(email, result) {
+    return new Promise((resolve, reject) => {
+
+      const htmlBody = this.generateSingleResultEmailHtml(result);
+      const { imageLink } = result;
+
+      this.transport.sendMail({
+        from: process.env.MAILER_USER,
+        to: email,
+        subject: `Check out this result!`,
+        html: htmlBody,
+        attachments: imageLink ? [{ filename: "thumbnail.jpg", path: imageLink }] : [] // send image if one exists
+      }, (err, info) => {
+        if (err) {
+          console.error("An error occurred in Mailer.sendSingleResultEmail: " + err);
+          reject();
+        } else if (info && info.rejected && info.rejected.length) {
+          console.log("An email address was rejected in Mailer.sendSingleResultEmail: " + email);
+          reject();
+        } else {
+          console.log("Email sent successfully.");
+          resolve(true);
+        }
+      });
+    });
+  }
+
+  generateResultsEmailHtml(results, confirmationCode) {
     let oldResults = results;
     if (this.onlyNew) {
       results = oldResults.filter(result => result.isNewResult);
@@ -75,8 +108,8 @@ module.exports = class Mailer {
       "en-US",
       { hour: "numeric", minute: "numeric"}
     );
-    let htmlBody = 
-    `<h1 style="font-size:22px;color:#2b2d42;">A total of ${numberOfResults} ${this.onlyNew ? "new " : ""}results were found that fit your query's parameters.</h1>
+    let htmlBody = `
+    <h1 style="font-size:22px;color:#2b2d42;">${numberOfResults} ${this.onlyNew ? "new " : ""}result${numberOfResults > 1 ? "s" : ""} ${numberOfResults > 1 ? "were" : "was"} found that fit your query's parameters:</h1>
     <table style="border-collapse:collapse;">
       <tbody>
         <tr style="background-color:#2b2d42;color:#f4faff;font-size:18px">
@@ -95,9 +128,34 @@ module.exports = class Mailer {
       </tbody>
       </table>
       <br />
-      <p style="padding:4px;color:#2b2d42;font-size:15px;">This data was pulled on ${currentDate}, at ${currentTime}.</p>
-      <p style="padding:4px;color:#2b2d42;font-size:15px;">If you no longer wish to receive alerts from Tracker Appr, <a href="http://localhost:3000/api/users/unsubscribe/${confirmationCode}" target="_blank">Unsubscribe</a></p>`
+      <p style="padding:4px;color:#2b2d42;font-size:15px;">This data was fetched on ${currentDate}, at ${currentTime}.</p>
+      <p style="padding:4px;color:#2b2d42;font-size:15px;">If you no longer wish to receive alerts from Tracker Appr, <a href="http://localhost:3000/api/users/unsubscribe/${confirmationCode}" target="_blank">unsubscribe</a></p>`
   
+    return htmlBody;
+  }
+
+  generateSingleResultEmailHtml(result) {
+    
+    const htmlBody = `
+    <h1 style="font-size:22px;color:#2b2d42;">Check out this result you were interested in:</h1>
+    <table style="border-collapse:collapse;">
+      <tbody>
+        <tr style="background-color:#2b2d42;color:#f4faff;font-size:18px">
+          <th style="padding:4px;border:solid #2b2d42 1px;">Stock #</th>
+          <th style="padding:4px;border:solid #2b2d42 1px;">Year</th>
+          <th style="padding:4px;border:solid #2b2d42 1px;">Make</th>
+          <th style="padding:4px;border:solid #2b2d42 1px;">Model</th>
+          <th style="padding:4px;border:solid #2b2d42 1px;">Trim</th>
+          <th style="padding:4px;border:solid #2b2d42 1px;">Price</th>
+          <th style="padding:4px;border:solid #2b2d42 1px;">Ext. Color</th>
+          <th style="padding:4px;border:solid #2b2d42 1px;">Vin #</th>
+          <th style="padding:4px;border:solid #2b2d42 1px;">New Result</th>
+          <th style="padding:4px;border:solid #2b2d42 1px;">Link</th>
+        </tr>
+        ${this.generateEmailHtmlRows([result])}
+      </tbody>
+    </table>
+    `;
     return htmlBody;
   }
   

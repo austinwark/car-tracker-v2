@@ -31,6 +31,24 @@ exports.getAllUsers = () => {
   });
 }
 
+exports.findUserByEmail = email => {
+  return new Promise((resolve, reject) => {
+
+    const sqlQuery = mysql.format("SELECT * FROM users WHERE email = ?",
+      [email.toLowerCase()]);
+    connection.query(sqlQuery, (err, results) => {
+      if (err) {
+        console.log(err);
+        reject();
+      } else {
+        const response = results && results.length ? results[0] : {};
+        console.log(response);
+        resolve(response);
+      }
+    })
+  })
+}
+
 /* Takes a plain-text password, encrypts it with a sha256 hash, and returns it */
 exports.getHashedPassword = password => {
   const sha256 = crypto.createHash("sha256");
