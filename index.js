@@ -68,40 +68,7 @@ app.post("/api/users/changePassword", changePassword)
 app.get("/logout", logout);
 
 /* Called on login form submit. Validates form data one more time. */
-<<<<<<< HEAD
-app.post("/login", (req, res) => {
-  const { email, password } = req.body;
-  const rememberMe = req.body.rememberMe ? true : false;
-  const hashedPassword = getHashedPassword(password);
-
-  const sqlQuery = mysql.format("SELECT * FROM users WHERE email = ?",
-    [email.toLowerCase()]);
-  connection.query(sqlQuery, (err, results) => {
-    if (err) {
-      res.redirect("/login?err=406");
-    } else if (results.length == 0) {
-      res.redirect("/login?err=404");
-    } else {
-      const user = results[0];
-      const confirmationCode = user.emailConfirmationCode;
-      if (hashedPassword === user.password) {
-        req.session.email = email.toLowerCase();
-        req.session.userId = user.userId;
-
-        const twoWeeks = 1210000000; // two weeks in milliseconds
-        if (rememberMe)
-          req.session.cookie.maxAge = twoWeeks; // set session cookie expiration date to two weeks if user chooses to stay logged in
-
-        res.redirect("/");
-      } else {
-        res.redirect("/login?err=401");
-      }
-    }
-  });
-});
-=======
 app.post("/login", login);
->>>>>>> develop
 
 /* Confirms user's email address (sets emailVerified to true) */
 app.get("/api/users/verify/:confirmationCode", confirmEmail);
