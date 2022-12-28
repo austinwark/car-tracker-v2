@@ -226,6 +226,11 @@ main #meta-panel .query-settings-card p {
   font-size: 1rem;
 }
 
+/* Create Query Styles */
+#create-form .form-check.form-switch, #create-form .form-check.form-switch input, #create-form .form-check.form-switch label {
+  cursor: pointer !important;
+}
+
 /* Registration Styles */
 body {
   background-color: var(--secondary-bg-color);

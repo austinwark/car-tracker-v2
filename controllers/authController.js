@@ -112,6 +112,7 @@ exports.logout = (req, res) => {
 
 exports.login = (req, res) => {
   const { email, password } = req.body;
+  const rememberMe = req.body.rememberMe ? true : false;
   const hashedPassword = getHashedPassword(password);
 
   const sqlQuery = mysql.format("SELECT * FROM users WHERE email = ?",
@@ -127,6 +128,11 @@ exports.login = (req, res) => {
       if (hashedPassword === user.password) {
         req.session.email = email.toLowerCase();
         req.session.userId = user.userId;
+
+        const twoWeeks = 1210000000; // two weeks in milliseconds
+        if (rememberMe)
+          req.session.cookie.maxAge = twoWeeks; // set session cookie expiration date to two weeks if user chooses to stay logged in
+          
         res.status(200).redirect("/");
       } else {
         res.redirect("/login?err=401");
