@@ -124,7 +124,7 @@ module.exports = class Mailer {
           reject();
         } else {
           console.log("Email sent successfully.");
-          resolve(results.length);
+          resolve(true);
         }
       });
     });
